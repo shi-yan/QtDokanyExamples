@@ -1165,7 +1165,7 @@ MirrorEnumerateNamedStreams(
 
 
 
-int main(int argc, char *argv[]){
+int main2(int argc, char *argv[]){
     int status;
     ULONG command;
     PDOKAN_OPERATIONS dokanOperations = (PDOKAN_OPERATIONS)malloc(sizeof(DOKAN_OPERATIONS));

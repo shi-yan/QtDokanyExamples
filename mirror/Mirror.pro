@@ -14,10 +14,15 @@ INCLUDEPATH += C:/code/dokan_tot/dokany/dokan \
 
 SOURCES += \
     DokanDrive.cpp \
-    main.cpp
+    main.cpp \
+    DokanDriveImplementation.cpp \
+    LocalDrive.cpp \
+    main2.cpp
 
 HEADERS += \
-    DokanDrive.h
+    DokanDrive.h \
+    DokanDriveImplementation.h \
+    LocalDrive.h
 
 LIBS += -lUser32 \
         -lAdvapi32 \
