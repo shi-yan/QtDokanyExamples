@@ -20,7 +20,9 @@ NTSTATUS LocalDrive::MirrorCreateFile(LPCWSTR FileName, PDOKAN_IO_SECURITY_CONTE
 
     qDebug() << "beginning"   << CreateDisposition;
 
-    if((CreateOptions & FILE_DIRECTORY_FILE) == FILE_DIRECTORY_FILE)
+    QFileInfo fi(filePath);
+    qDebug() << "open" << filePath << "is dir?" << fi.isDir();
+    if(((CreateOptions & FILE_DIRECTORY_FILE) == FILE_DIRECTORY_FILE) || fi.isDir())
     {
         DokanFileInfo->IsDirectory = true;
         if(CreateDisposition == FILE_CREATE)

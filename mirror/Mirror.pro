@@ -1,4 +1,4 @@
-QT += core
+QT += core network
 QT -= gui
 
 TARGET = Mirror
@@ -14,15 +14,21 @@ INCLUDEPATH += C:/code/dokan_tot/dokany/dokan \
 
 SOURCES += \
     DokanDrive.cpp \
-    main.cpp \
     DokanDriveImplementation.cpp \
     LocalDrive.cpp \
-    main2.cpp
+    main.cpp \
+    NetworkDrive.cpp \
+    NetworkDriveServer.cpp \
+    NetworkDriveClient.cpp
 
 HEADERS += \
     DokanDrive.h \
     DokanDriveImplementation.h \
-    LocalDrive.h
+    LocalDrive.h \
+    NetworkDrive.h \
+    NetworkDriveServer.h \
+    NetworkDriveProtocol.h \
+    NetworkDriveClient.h
 
 LIBS += -lUser32 \
         -lAdvapi32 \
