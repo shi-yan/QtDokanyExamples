@@ -117,10 +117,10 @@ void NetworkDriveClient::processMessage(QByteArray &message)
 
         messageDataStream >> currentMessageId >> filePath >> AccessMode >> CreateDisposition >> CreateOptions;
         QByteArray resultArray;
-        resultArray.append(messageType);
-        resultArray.append(currentMessageId);
-        clientCreateFile(resultArray, filePath, AccessMode, CreateDisposition, CreateOptions);
 
+        clientCreateFile(resultArray, filePath, AccessMode, CreateDisposition, CreateOptions);
+        resultArray.prepend(currentMessageId);
+        resultArray.prepend(messageType);
         if (m_socket)
         {
             QByteArray sizeData;
@@ -142,11 +142,10 @@ void NetworkDriveClient::processMessage(QByteArray &message)
 
         messageDataStream >> currentMessageId >>filePath >> context;
         QByteArray resultArray;
-        resultArray.append(messageType);
-        resultArray.append(currentMessageId);
 
         clientCloseFile(resultArray, filePath, context);
-
+        resultArray.prepend(currentMessageId);
+        resultArray.prepend(messageType);
         if (m_socket)
         {
             QByteArray sizeData;
@@ -167,11 +166,10 @@ void NetworkDriveClient::processMessage(QByteArray &message)
 
         messageDataStream >> currentMessageId >> filePath >> DokanFileInfo_context >> DokanFileInfo_deleteOnClose;
         QByteArray resultArray;
-        resultArray.append(messageType);
-        resultArray.append(currentMessageId);
 
         clientCleanUp(resultArray, filePath, DokanFileInfo_context, DokanFileInfo_deleteOnClose);
-
+        resultArray.prepend(currentMessageId);
+        resultArray.prepend(messageType);
         if (m_socket)
         {
             QByteArray sizeData;
@@ -194,11 +192,10 @@ void NetworkDriveClient::processMessage(QByteArray &message)
 
         messageDataStream >> currentMessageId >> filePath >> BufferLength >> ReadLength >> Offset >> DokanFileInfo_context;
         QByteArray resultArray;
-        resultArray.append(messageType);
-        resultArray.append(currentMessageId);
 
         clientReadFile(resultArray, filePath, BufferLength, Offset, DokanFileInfo_context);
-
+        resultArray.prepend(currentMessageId);
+        resultArray.prepend(messageType);
         if (m_socket)
         {
             QByteArray sizeData;
@@ -223,10 +220,10 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath >> NumberOfBytesToWrite >> Offset >> DokanFileInfo_context >> dataBuffer;
 
         QByteArray resultArray;
-        resultArray.append(messageType);
-        resultArray.append(currentMessageId);
-        clientWriteFile(resultArray, filePath, dataBuffer.data(), NumberOfBytesToWrite, Offset, DokanFileInfo_context);
 
+        clientWriteFile(resultArray, filePath, dataBuffer.data(), NumberOfBytesToWrite, Offset, DokanFileInfo_context);
+        resultArray.prepend(currentMessageId);
+        resultArray.prepend(messageType);
         if (m_socket)
         {
             QByteArray sizeData;
@@ -247,10 +244,10 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath >> DokanFileInfo_context;
 
         QByteArray resultArray;
-        resultArray.append(messageType);
-        resultArray.append(currentMessageId);
-        clientFlushFileBuffers(resultArray, filePath, DokanFileInfo_context);
 
+        clientFlushFileBuffers(resultArray, filePath, DokanFileInfo_context);
+        resultArray.prepend(currentMessageId);
+        resultArray.prepend(messageType);
         if (m_socket)
         {
             QByteArray sizeData;
@@ -271,10 +268,10 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath >> DokanFileInfo_isDirectory;
 
         QByteArray resultArray;
-        resultArray.append(messageType);
-        resultArray.append(currentMessageId);
-        clientGetFileInformation(resultArray, filePath, DokanFileInfo_isDirectory);
 
+        clientGetFileInformation(resultArray, filePath, DokanFileInfo_isDirectory);
+        resultArray.prepend(currentMessageId);
+        resultArray.prepend(messageType);
         if (m_socket)
         {
             QByteArray sizeData;
@@ -294,10 +291,10 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath;
 
         QByteArray resultArray;
-        resultArray.append(messageType);
-        resultArray.append(currentMessageId);
-        clientFindFiles(resultArray, filePath);
 
+        clientFindFiles(resultArray, filePath);
+        resultArray.prepend(currentMessageId);
+        resultArray.prepend(messageType);
         if (m_socket)
         {
             QByteArray sizeData;
@@ -317,10 +314,10 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath;
 
         QByteArray resultArray;
-        resultArray.append(messageType);
-        resultArray.append(currentMessageId);
-        clientDeleteFile(resultArray, filePath);
 
+        clientDeleteFile(resultArray, filePath);
+        resultArray.prepend(currentMessageId);
+        resultArray.prepend(messageType);
         if (m_socket)
         {
             QByteArray sizeData;
@@ -340,10 +337,10 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath;
 
         QByteArray resultArray;
-        resultArray.append(messageType);
-        resultArray.append(currentMessageId);
-        clientDeleteDirectory(resultArray, filePath);
 
+        clientDeleteDirectory(resultArray, filePath);
+        resultArray.prepend(currentMessageId);
+        resultArray.prepend(messageType);
         if (m_socket)
         {
             QByteArray sizeData;
@@ -365,10 +362,10 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath >> NewFileName >> ReplaceIfExisting;
 
         QByteArray resultArray;
-        resultArray.append(messageType);
-        resultArray.append(currentMessageId);
-        clientMoveFile(resultArray, filePath, NewFileName, ReplaceIfExisting);
 
+        clientMoveFile(resultArray, filePath, NewFileName, ReplaceIfExisting);
+        resultArray.prepend(currentMessageId);
+        resultArray.prepend(messageType);
         if (m_socket)
         {
             QByteArray sizeData;
@@ -391,10 +388,10 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath >> ByteOffset >> Length >> DokanFileInfo_context;
 
         QByteArray resultArray;
-        resultArray.append(messageType);
-        resultArray.append(currentMessageId);
-        clientLockFile(resultArray, filePath, ByteOffset, Length, DokanFileInfo_context);
 
+        clientLockFile(resultArray, filePath, ByteOffset, Length, DokanFileInfo_context);
+        resultArray.prepend(currentMessageId);
+        resultArray.prepend(messageType);
         if (m_socket)
         {
             QByteArray sizeData;
@@ -416,10 +413,10 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath >> ByteOffset >> DokanFileInfo_context;
 
         QByteArray resultArray;
-        resultArray.append(messageType);
-        resultArray.append(currentMessageId);
-        clientSetEndOfFile(resultArray, filePath, ByteOffset, DokanFileInfo_context);
 
+        clientSetEndOfFile(resultArray, filePath, ByteOffset, DokanFileInfo_context);
+        resultArray.prepend(currentMessageId);
+        resultArray.prepend(messageType);
         if (m_socket)
         {
             QByteArray sizeData;
@@ -441,10 +438,10 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath >> AllocSize >> DokanFileInfo_context;
 
         QByteArray resultArray;
-        resultArray.append(messageType);
-        resultArray.append(currentMessageId);
-        clientSetAllocationSize(resultArray, filePath, AllocSize, DokanFileInfo_context);
 
+        clientSetAllocationSize(resultArray, filePath, AllocSize, DokanFileInfo_context);
+        resultArray.prepend(currentMessageId);
+        resultArray.prepend(messageType);
         if (m_socket)
         {
             QByteArray sizeData;
@@ -466,10 +463,10 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath >> FileAttributes >> DokanFileInfo_context;
 
         QByteArray resultArray;
-        resultArray.append(messageType);
-        resultArray.append(currentMessageId);
-        clientSetFileAttributes(resultArray, filePath, FileAttributes, DokanFileInfo_context);
 
+        clientSetFileAttributes(resultArray, filePath, FileAttributes, DokanFileInfo_context);
+        resultArray.prepend(currentMessageId);
+        resultArray.prepend(messageType);
         if (m_socket)
         {
             QByteArray sizeData;
@@ -493,10 +490,10 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath >> CreationTime >> LastAccessTime >> LastWriteTime >> DokanFileInfo_context;
 
         QByteArray resultArray;
-        resultArray.append(messageType);
-        resultArray.append(currentMessageId);
-        clientSetFileTime(resultArray, filePath, CreationTime, LastAccessTime, LastWriteTime, DokanFileInfo_context);
 
+        clientSetFileTime(resultArray, filePath, CreationTime, LastAccessTime, LastWriteTime, DokanFileInfo_context);
+        resultArray.prepend(currentMessageId);
+        resultArray.prepend(messageType);
         if (m_socket)
         {
             QByteArray sizeData;
@@ -519,10 +516,10 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath >> ByteOffset >> Length >> DokanFileInfo_context;
 
         QByteArray resultArray;
-        resultArray.append(messageType);
-        resultArray.append(currentMessageId);
-        clientUnlockFile(resultArray, filePath, ByteOffset, Length, DokanFileInfo_context);
 
+        clientUnlockFile(resultArray, filePath, ByteOffset, Length, DokanFileInfo_context);
+        resultArray.prepend(currentMessageId);
+        resultArray.prepend(messageType);
         if (m_socket)
         {
             QByteArray sizeData;
@@ -547,10 +544,10 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath >> SecurityInformation >> SecurityDescriptor >> BufferLength >> LengthNeeded >> DokanFileInfo_context;
 
         QByteArray resultArray;
-        resultArray.append(messageType);
-        resultArray.append(currentMessageId);
-        clientGetFileSecurity(resultArray, filePath, SecurityInformation, SecurityDescriptor, BufferLength, LengthNeeded, DokanFileInfo_context);
 
+        clientGetFileSecurity(resultArray, filePath, SecurityInformation, SecurityDescriptor, BufferLength, LengthNeeded, DokanFileInfo_context);
+        resultArray.prepend(currentMessageId);
+        resultArray.prepend(messageType);
         if (m_socket)
         {
             QByteArray sizeData;
@@ -574,10 +571,10 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath << SecurityInformation << SecurityDescriptor << SecurityDescriptorLength << DokanFileInfo_context;
 
         QByteArray resultArray;
-        resultArray.append(messageType);
-        resultArray.append(currentMessageId);
-        clientSetFileSecurity(resultArray, filePath, SecurityInformation, SecurityDescriptor, SecurityDescriptorLength, DokanFileInfo_context);
 
+        clientSetFileSecurity(resultArray, filePath, SecurityInformation, SecurityDescriptor, SecurityDescriptorLength, DokanFileInfo_context);
+        resultArray.prepend(currentMessageId);
+        resultArray.prepend(messageType);
         if (m_socket)
         {
             QByteArray sizeData;

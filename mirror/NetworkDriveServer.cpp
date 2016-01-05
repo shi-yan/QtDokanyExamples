@@ -200,7 +200,7 @@ void NetworkDriveServer::processMessage(QByteArray &message)
 void NetworkDriveServer::remoteCreateFile(QByteArray &result,const QString &filePath, quint64 AccessMode, quint64 CreateDisposition, quint64 CreateOptions)
 {
     QByteArray *messageArray = new QByteArray();
-    QDataStream messageDataStream(*messageArray);
+    QDataStream messageDataStream(messageArray, QIODevice::WriteOnly);
     quint32 messageType = CREATE_FILE;
     qint32 currentMessageId = m_messageId++;
 
@@ -222,7 +222,7 @@ void NetworkDriveServer::remoteCreateFile(QByteArray &result,const QString &file
 void NetworkDriveServer::remoteCloseFile(QByteArray &result,const QString &filePath, quint64 DokanFileInfo_context)
 {
     QByteArray *messageArray = new QByteArray();
-    QDataStream messageDataStream(*messageArray);
+    QDataStream messageDataStream(messageArray, QIODevice::WriteOnly);
     quint32 messageType = CLOSE_FILE;
     qint32 currentMessageId = m_messageId++;
 
@@ -243,7 +243,7 @@ void NetworkDriveServer::remoteCloseFile(QByteArray &result,const QString &fileP
 void NetworkDriveServer::remoteCleanUp(QByteArray &result,const QString &filePath, quint64 DokanFileInfo_context, bool DokanFileInfo_deleteOnClose)
 {
     QByteArray *messageArray = new QByteArray();
-    QDataStream messageDataStream(*messageArray);
+    QDataStream messageDataStream(messageArray, QIODevice::WriteOnly);
     quint32 messageType = CLEAN_UP_FILE;
     qint32 currentMessageId = m_messageId++;
 
@@ -264,7 +264,7 @@ void NetworkDriveServer::remoteCleanUp(QByteArray &result,const QString &filePat
 void NetworkDriveServer::remoteReadFile(QByteArray &result,const QString &filePath, quint64 BufferLength, quint64 Offset, quint64 DokanFileInfo_context)
 {
     QByteArray *messageArray = new QByteArray();
-    QDataStream messageDataStream(*messageArray);
+    QDataStream messageDataStream(messageArray, QIODevice::WriteOnly);
     quint32 messageType = READ_FILE;
     qint32 currentMessageId = m_messageId++;
 
@@ -285,7 +285,7 @@ void NetworkDriveServer::remoteReadFile(QByteArray &result,const QString &filePa
 void NetworkDriveServer::remoteWriteFile(QByteArray &result,const QString &filePath, char *buffer, quint64 NumberOfBytesToWrite, quint64 Offset, quint64 DokanFileInfo_context)
 {
     QByteArray *messageArray = new QByteArray();
-    QDataStream messageDataStream(*messageArray);
+    QDataStream messageDataStream(messageArray, QIODevice::WriteOnly);
     quint32 messageType = WRITE_FILE;
     qint32 currentMessageId = m_messageId++;
 
@@ -308,7 +308,7 @@ void NetworkDriveServer::remoteWriteFile(QByteArray &result,const QString &fileP
 void NetworkDriveServer::remoteFlushFileBuffers(QByteArray &result,const QString &filePath, quint64 DokanFileInfo_context)
 {
     QByteArray *messageArray = new QByteArray();
-    QDataStream messageDataStream(*messageArray);
+    QDataStream messageDataStream(messageArray, QIODevice::WriteOnly);
     quint32 messageType = FLUSH_FILE_BUFFERS;
     qint32 currentMessageId = m_messageId++;
 
@@ -329,7 +329,7 @@ void NetworkDriveServer::remoteFlushFileBuffers(QByteArray &result,const QString
 void NetworkDriveServer::remoteGetFileInformation(QByteArray &result,const QString &filePath, bool DokanFileInfo_isDirectory)
 {
     QByteArray *messageArray = new QByteArray();
-    QDataStream messageDataStream(*messageArray);
+    QDataStream messageDataStream(messageArray, QIODevice::WriteOnly);
     quint32 messageType = GET_FILE_INFORMATION;
     qint32 currentMessageId = m_messageId++;
 
@@ -350,7 +350,7 @@ void NetworkDriveServer::remoteGetFileInformation(QByteArray &result,const QStri
 void NetworkDriveServer::remoteFindFiles(QByteArray &result,const QString &filePath)
 {
     QByteArray *messageArray = new QByteArray();
-    QDataStream messageDataStream(*messageArray);
+    QDataStream messageDataStream(messageArray, QIODevice::WriteOnly);
     quint32 messageType = FIND_FILES;
     qint32 currentMessageId = m_messageId++;
 
@@ -371,7 +371,7 @@ void NetworkDriveServer::remoteFindFiles(QByteArray &result,const QString &fileP
 void NetworkDriveServer::remoteDeleteFile(QByteArray &result,const QString &filePath)
 {
     QByteArray *messageArray = new QByteArray();
-    QDataStream messageDataStream(*messageArray);
+    QDataStream messageDataStream(messageArray, QIODevice::WriteOnly);
     quint32 messageType = DELETE_FILE;
     qint32 currentMessageId = m_messageId++;
 
@@ -392,7 +392,7 @@ void NetworkDriveServer::remoteDeleteFile(QByteArray &result,const QString &file
 void NetworkDriveServer::remoteDeleteDirectory(QByteArray &result,const QString &filePath)
 {
     QByteArray *messageArray = new QByteArray();
-    QDataStream messageDataStream(*messageArray);
+    QDataStream messageDataStream(messageArray, QIODevice::WriteOnly);
     quint32 messageType = DELETE_DIRECTORY;
     qint32 currentMessageId = m_messageId++;
 
@@ -413,7 +413,7 @@ void NetworkDriveServer::remoteDeleteDirectory(QByteArray &result,const QString 
 void NetworkDriveServer::remoteMoveFile(QByteArray &result,const QString &filePath, const QString &NewFileName, bool ReplaceIfExisting)
 {
     QByteArray *messageArray = new QByteArray();
-    QDataStream messageDataStream(*messageArray);
+    QDataStream messageDataStream(messageArray, QIODevice::WriteOnly);
     quint32 messageType = MOVE_FILE;
     qint32 currentMessageId = m_messageId++;
 
@@ -434,7 +434,7 @@ void NetworkDriveServer::remoteMoveFile(QByteArray &result,const QString &filePa
 void NetworkDriveServer::remoteLockFile(QByteArray &result,const QString &filePath, quint64 ByteOffset, quint64 Length, quint64 DokanFileInfo_context)
 {
     QByteArray *messageArray = new QByteArray();
-    QDataStream messageDataStream(*messageArray);
+    QDataStream messageDataStream(messageArray, QIODevice::WriteOnly);
     quint32 messageType = LOCK_FILE;
     qint32 currentMessageId = m_messageId++;
 
@@ -455,7 +455,7 @@ void NetworkDriveServer::remoteLockFile(QByteArray &result,const QString &filePa
 void NetworkDriveServer::remoteSetEndOfFile(QByteArray &result,const QString &filePath, quint64 ByteOffset, quint64 DokanFileInfo_context)
 {
     QByteArray *messageArray = new QByteArray();
-    QDataStream messageDataStream(*messageArray);
+    QDataStream messageDataStream(messageArray, QIODevice::WriteOnly);
     quint32 messageType = SET_END_OF_FILE;
     qint32 currentMessageId = m_messageId++;
 
@@ -476,7 +476,7 @@ void NetworkDriveServer::remoteSetEndOfFile(QByteArray &result,const QString &fi
 void NetworkDriveServer::remoteSetAllocationSize(QByteArray &result,const QString &filePath, quint64 AllocSize, quint64 DokanFileInfo_context)
 {
     QByteArray *messageArray = new QByteArray();
-    QDataStream messageDataStream(*messageArray);
+    QDataStream messageDataStream(messageArray, QIODevice::WriteOnly);
     quint32 messageType = SET_ALLOCATION_SIZE;
     qint32 currentMessageId = m_messageId++;
 
@@ -497,7 +497,7 @@ void NetworkDriveServer::remoteSetAllocationSize(QByteArray &result,const QStrin
 void NetworkDriveServer::remoteSetFileAttributes(QByteArray &result,const QString &filePath, quint64 FileAttributes, quint64 DokanFileInfo_context)
 {
     QByteArray *messageArray = new QByteArray();
-    QDataStream messageDataStream(*messageArray);
+    QDataStream messageDataStream(messageArray, QIODevice::WriteOnly);
     quint32 messageType = SET_FILE_ATTRIBUTES;
     qint32 currentMessageId = m_messageId++;
 
@@ -518,7 +518,7 @@ void NetworkDriveServer::remoteSetFileAttributes(QByteArray &result,const QStrin
 void NetworkDriveServer::remoteSetFileTime(QByteArray &result,const QString &filePath, QDateTime &CreationTime, QDateTime &LastAccessTime, QDateTime &LastWriteTime, quint64 DokanFileInfo_context)
 {
     QByteArray *messageArray = new QByteArray();
-    QDataStream messageDataStream(*messageArray);
+    QDataStream messageDataStream(messageArray, QIODevice::WriteOnly);
     quint32 messageType = SET_FILE_TIME;
     qint32 currentMessageId = m_messageId++;
 
@@ -539,7 +539,7 @@ void NetworkDriveServer::remoteSetFileTime(QByteArray &result,const QString &fil
 void NetworkDriveServer::remoteUnlockFile(QByteArray &result,const QString &filePath, quint64 ByteOffset, quint64	Length, quint64	DokanFileInfo_context)
 {
     QByteArray *messageArray = new QByteArray();
-    QDataStream messageDataStream(*messageArray);
+    QDataStream messageDataStream(messageArray, QIODevice::WriteOnly);
     quint32 messageType = UNLOCK_FILE;
     qint32 currentMessageId = m_messageId++;
 
@@ -560,7 +560,7 @@ void NetworkDriveServer::remoteUnlockFile(QByteArray &result,const QString &file
 void NetworkDriveServer::remoteGetFileSecurity(QByteArray &result,const QString &filePath, quint64 SecurityInformation, quint64 SecurityDescriptor, quint64 BufferLength, quint64	LengthNeeded, quint64 DokanFileInfo_context)
 {
     QByteArray *messageArray = new QByteArray();
-    QDataStream messageDataStream(*messageArray);
+    QDataStream messageDataStream(messageArray, QIODevice::WriteOnly);
     quint32 messageType = GET_FILE_SECURITY;
     qint32 currentMessageId = m_messageId++;
 
@@ -581,7 +581,7 @@ void NetworkDriveServer::remoteGetFileSecurity(QByteArray &result,const QString 
 void NetworkDriveServer::remoteSetFileSecurity(QByteArray &result,const QString &filePath, quint64 SecurityInformation, quint64 SecurityDescriptor, quint64 SecurityDescriptorLength, quint64 DokanFileInfo_context)
 {
     QByteArray *messageArray = new QByteArray();
-    QDataStream messageDataStream(*messageArray);
+    QDataStream messageDataStream(messageArray, QIODevice::WriteOnly);
     quint32 messageType = SET_FILE_SECURITY;
     qint32 currentMessageId = m_messageId++;
 
@@ -602,7 +602,7 @@ void NetworkDriveServer::remoteSetFileSecurity(QByteArray &result,const QString 
 void NetworkDriveServer::remoteGetVolumeInformation(QByteArray &result,const QString &VolumeNameBuffer, quint64 VolumeNameSize, quint64 VolumeSerialNumber, quint64	MaximumComponentLength, const QString &FileSystemFlags, const QString &FileSystemNameBuffer, quint64	FileSystemNameSize)
 {
     QByteArray *messageArray = new QByteArray();
-    QDataStream messageDataStream(*messageArray);
+    QDataStream messageDataStream(messageArray, QIODevice::WriteOnly);
     quint32 messageType = GET_VOLUME_INFORMATION;
     qint32 currentMessageId = m_messageId++;
 
@@ -623,7 +623,7 @@ void NetworkDriveServer::remoteGetVolumeInformation(QByteArray &result,const QSt
 void NetworkDriveServer::remoteUnmount()
 {
     QByteArray *messageArray = new QByteArray();
-    QDataStream messageDataStream(*messageArray);
+    QDataStream messageDataStream(messageArray, QIODevice::WriteOnly);
     quint32 messageType = UNMOUNT;
     qint32 currentMessageId = m_messageId++;
 
@@ -644,7 +644,7 @@ void NetworkDriveServer::remoteUnmount()
 void NetworkDriveServer::remoteEnumerateNamedStreams(QByteArray &result,const QString &filePath, quint64 EnumContext, const QString &StreamName, quint64 StreamNameLength, quint64 StreamSize)
 {
     QByteArray *messageArray = new QByteArray();
-    QDataStream messageDataStream(*messageArray);
+    QDataStream messageDataStream(messageArray, QIODevice::WriteOnly);
     quint32 messageType = ENUMERATE_NAMED_STREAMS;
     qint32 currentMessageId = m_messageId++;
 
