@@ -6,6 +6,7 @@
 
 class NetworkDriveClient : public QObject
 {
+    Q_OBJECT
 private:
     QTcpSocket *m_socket;
     QByteArray m_dataBuffer;

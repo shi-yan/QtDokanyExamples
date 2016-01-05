@@ -2,9 +2,11 @@
 #include <QDataStream>
 #include <QFileInfo>
 
-NetworkDrive::NetworkDrive()
+NetworkDrive::NetworkDrive(NetworkDriveServer *server)
 {
-    m_client = new NetworkDriveClient();
+    //m_client = new NetworkDriveClient();
+    m_server = server;
+    //m_server->listen(QHostAddress::LocalHost, 12345);
 }
 
 NetworkDrive::~NetworkDrive()
@@ -19,7 +21,7 @@ NTSTATUS NetworkDrive::MirrorCreateFile(LPCWSTR FileName, PDOKAN_IO_SECURITY_CON
 
     qDebug() << "before calling client createfile" << fileName << CreateDisposition;
 
-    m_client->clientCreateFile(replyArray, fileName, (quint64) AccessMode, (quint64) CreateDisposition, (quint64) CreateOptions);
+    m_server->remoteCreateFile(replyArray, fileName, AccessMode, CreateDisposition, CreateOptions);
 
     quint64 result;
 
@@ -46,7 +48,8 @@ void NetworkDrive::MirrorCloseFile(LPCWSTR FileName, PDOKAN_FILE_INFO DokanFileI
     QByteArray replyArray;
     QString fileName = getFileName(FileName);
 
-    m_client->clientCloseFile(replyArray, fileName, (quint64) DokanFileInfo->Context);
+    //m_client->clientCloseFile(replyArray, fileName, (quint64) DokanFileInfo->Context);
+    m_server->remoteCloseFile(replyArray, fileName, (quint64) DokanFileInfo->Context);
 }
 
 void NetworkDrive::MirrorCleanup(LPCWSTR FileName, PDOKAN_FILE_INFO DokanFileInfo)
@@ -54,8 +57,9 @@ void NetworkDrive::MirrorCleanup(LPCWSTR FileName, PDOKAN_FILE_INFO DokanFileInf
     QByteArray replyArray;
     QString fileName = getFileName(FileName);
 
-    m_client->clientCleanUp(replyArray, fileName, (quint64) DokanFileInfo->Context, (bool) DokanFileInfo->DeleteOnClose);
+    //m_client->clientCleanUp(replyArray, fileName, (quint64) DokanFileInfo->Context, (bool) DokanFileInfo->DeleteOnClose);
 
+    m_server->remoteCleanUp(replyArray, fileName, (quint64) DokanFileInfo->Context, (bool) DokanFileInfo->DeleteOnClose);
     DokanFileInfo->Context = NULL;
 }
 
@@ -64,7 +68,9 @@ NTSTATUS NetworkDrive::MirrorReadFile(LPCWSTR FileName, LPVOID Buffer, DWORD Buf
     QByteArray replyArray;
     QString fileName = getFileName(FileName);
 
-    m_client->clientReadFile(replyArray, fileName, (quint64) BufferLength, (quint64) Offset, (quint64) DokanFileInfo->Context );
+    //m_client->clientReadFile(replyArray, fileName, (quint64) BufferLength, (quint64) Offset, (quint64) DokanFileInfo->Context );
+
+    m_server->remoteReadFile(replyArray, fileName, (quint64) BufferLength, (quint64) Offset, (quint64) DokanFileInfo->Context);
 
     quint64 result;
 
@@ -95,7 +101,10 @@ NTSTATUS NetworkDrive::MirrorWriteFile(LPCWSTR FileName, LPCVOID Buffer, DWORD	N
 
     QString fileName = getFileName(FileName);
 
-    m_client->clientWriteFile(replyArray, fileName, (char*)Buffer, (quint64) NumberOfBytesToWrite, (quint64) Offset, (quint64) DokanFileInfo->Context);
+    //m_client->clientWriteFile(replyArray, fileName, (char*)Buffer, (quint64) NumberOfBytesToWrite, (quint64) Offset, (quint64) DokanFileInfo->Context);
+
+    m_server->remoteWriteFile(replyArray, fileName, (char*) Buffer, (quint64) NumberOfBytesToWrite, (quint64) Offset, (quint64) DokanFileInfo->Context);
+
     quint64 result;
 
     QDataStream resultStream(replyArray);
@@ -116,7 +125,9 @@ NTSTATUS NetworkDrive::MirrorFlushFileBuffers(LPCWSTR	FileName, PDOKAN_FILE_INFO
 {
     QByteArray resultArray;
     QString fileName = getFileName(FileName);
-    m_client->clientFlushFileBuffers(resultArray, fileName, (quint64) DokanFileInfo->Context);
+    //m_client->clientFlushFileBuffers(resultArray, fileName, (quint64) DokanFileInfo->Context);
+
+    m_server->remoteFlushFileBuffers(resultArray, fileName, (quint64) DokanFileInfo->Context);
 
     QDataStream resultStream(resultArray);
     quint64 result;
@@ -131,7 +142,9 @@ NTSTATUS NetworkDrive::MirrorGetFileInformation(LPCWSTR FileName, LPBY_HANDLE_FI
     QByteArray resultArray;
     QString fileName = getFileName(FileName);
 
-    m_client->clientGetFileInformation(resultArray, fileName, DokanFileInfo->IsDirectory);
+    //m_client->clientGetFileInformation(resultArray, fileName, DokanFileInfo->IsDirectory);
+
+    m_server->remoteGetFileInformation(resultArray, fileName, DokanFileInfo->IsDirectory);
 
     quint64 result;
     QDataStream resultStream(resultArray);
@@ -168,7 +181,9 @@ NTSTATUS NetworkDrive::MirrorFindFiles(LPCWSTR FileName, PFillFindData FillFindD
     QString fileName = getFileName(FileName);
 
 
-    m_client->clientFindFiles(resultArray, fileName);
+    //m_client->clientFindFiles(resultArray, fileName);
+
+    m_server->remoteFindFiles(resultArray, fileName);
 
     quint64 result;
     QDataStream resultStream(resultArray);
@@ -204,7 +219,8 @@ NTSTATUS NetworkDrive::MirrorDeleteFile(LPCWSTR FileName, PDOKAN_FILE_INFO Dokan
 
     QString fileName = getFileName(FileName);
 
-    m_client->clientDeleteFile(resultArray, fileName);
+    //m_client->clientDeleteFile(resultArray, fileName);
+    m_server->remoteDeleteFile(resultArray, fileName);
 
     quint64 result;
     QDataStream resultStream(resultArray);
@@ -220,7 +236,9 @@ NTSTATUS NetworkDrive::MirrorDeleteDirectory(LPCWSTR FileName, PDOKAN_FILE_INFO 
 
     QString fileName = getFileName(FileName);
 
-    m_client->clientDeleteDirectory(resultArray, fileName);
+    //m_client->clientDeleteDirectory(resultArray, fileName);
+
+    m_server->remoteDeleteDirectory(resultArray, fileName);
 
     quint64 result;
 
@@ -238,7 +256,9 @@ NTSTATUS NetworkDrive::MirrorMoveFile(LPCWSTR	FileName, LPCWSTR NewFileName, BOO
     QString fileName = getFileName(FileName);
     QString newFileName = getFileName(NewFileName);
 
-    m_client->clientMoveFile(resultArray, fileName, newFileName, ReplaceIfExisting);
+    //m_client->clientMoveFile(resultArray, fileName, newFileName, ReplaceIfExisting);
+
+    m_server->remoteMoveFile(resultArray, fileName, newFileName, ReplaceIfExisting);
 
     QDataStream resultStream(resultArray);
 
@@ -255,7 +275,9 @@ NTSTATUS NetworkDrive::MirrorLockFile(LPCWSTR	FileName, LONGLONG ByteOffset, LON
 
     QString fileName = getFileName(FileName);
 
-    m_client->clientLockFile(resultArray, fileName, ByteOffset, Length, DokanFileInfo->Context);
+    //m_client->clientLockFile(resultArray, fileName, ByteOffset, Length, DokanFileInfo->Context);
+
+    m_server->remoteLockFile(resultArray, fileName, ByteOffset, Length, DokanFileInfo->Context);
 
     QDataStream resultStream(resultArray);
 
@@ -271,7 +293,9 @@ NTSTATUS NetworkDrive::MirrorSetEndOfFile(LPCWSTR	FileName, LONGLONG ByteOffset,
     QByteArray resultArray;
     QString fileName = getFileName(FileName);
 
-    m_client->clientSetEndOfFile(resultArray, fileName, ByteOffset, DokanFileInfo->Context);
+    //m_client->clientSetEndOfFile(resultArray, fileName, ByteOffset, DokanFileInfo->Context);
+
+    m_server->remoteSetEndOfFile(resultArray, fileName, ByteOffset, DokanFileInfo->Context);
 
     QDataStream resultStream(resultArray);
 
@@ -287,8 +311,9 @@ NTSTATUS NetworkDrive::MirrorSetAllocationSize(LPCWSTR FileName, LONGLONG	AllocS
 
     QString fileName = getFileName(FileName);
 
-    m_client->clientSetAllocationSize(resultArray, fileName, AllocSize, DokanFileInfo->Context);
+    //m_client->clientSetAllocationSize(resultArray, fileName, AllocSize, DokanFileInfo->Context);
 
+    m_server->remoteSetAllocationSize(resultArray, fileName, AllocSize, DokanFileInfo->Context);
     QDataStream resultStream(resultArray);
 
     quint64 result;
@@ -304,7 +329,9 @@ NTSTATUS NetworkDrive::MirrorSetFileAttributes(LPCWSTR FileName, DWORD FileAttri
 
     QString fileName = getFileName(FileName);
 
-    m_client->clientSetFileAttributes(resultArray, fileName, FileAttributes, DokanFileInfo->Context);
+    //m_client->clientSetFileAttributes(resultArray, fileName, FileAttributes, DokanFileInfo->Context);
+
+    m_server->remoteSetFileAttributes(resultArray, fileName, FileAttributes, DokanFileInfo->Context);
 
     QDataStream resultStream(resultArray);
 
@@ -320,7 +347,9 @@ NTSTATUS NetworkDrive::MirrorSetFileTime(LPCWSTR FileName, CONST FILETIME* Creat
 
     QString fileName = getFileName(FileName);
 
-    m_client->clientSetFileTime(resultArray, fileName, QDateTime::currentDateTime(), QDateTime::currentDateTime(), QDateTime::currentDateTime(), (quint64) DokanFileInfo->Context);
+    //m_client->clientSetFileTime(resultArray, fileName, QDateTime::currentDateTime(), QDateTime::currentDateTime(), QDateTime::currentDateTime(), (quint64) DokanFileInfo->Context);
+
+    m_server->remoteSetFileTime(resultArray, fileName, QDateTime::currentDateTime(), QDateTime::currentDateTime(), QDateTime::currentDateTime(), (quint64) DokanFileInfo->Context);
 
     QDataStream resultStream(resultArray);
 
@@ -337,7 +366,9 @@ NTSTATUS NetworkDrive::MirrorUnlockFile(LPCWSTR FileName, LONGLONG ByteOffset, L
 
     QString fileName = getFileName(FileName);
 
-    m_client->clientUnlockFile(resultArray, fileName, ByteOffset, Length, DokanFileInfo->Context);
+    //m_client->clientUnlockFile(resultArray, fileName, ByteOffset, Length, DokanFileInfo->Context);
+
+    m_server->remoteUnlockFile(resultArray, fileName, ByteOffset, Length, DokanFileInfo->Context);
 
     QDataStream resultStream(resultArray);
 

@@ -36,6 +36,7 @@ void NetworkDriveClient::connectToServer()
 {
     if (!m_socket)
     {
+        qDebug() << "connect to server";
         m_socket = new QTcpSocket(this);
         m_socket->connectToHost(QHostAddress::LocalHost, 12345);
 
@@ -45,8 +46,9 @@ void NetworkDriveClient::connectToServer()
 
 void NetworkDriveClient::onSocketReadyRead()
 {
+    qDebug() << "received data";
     m_dataBuffer.append(m_socket->readAll());
-
+    processData();
 }
 
 void NetworkDriveClient::processData()
@@ -73,6 +75,7 @@ void NetworkDriveClient::processData()
         if (m_currentDataSize != -1 && m_dataBuffer.size() >= m_currentDataSize)
         {
             QByteArray messageData(m_dataBuffer.data(), m_currentDataSize);
+            qDebug() << "datasize" << m_currentDataSize;
             m_dataBuffer.remove(0, m_currentDataSize);
             m_currentDataSize = -1;
             processMessage(messageData);
@@ -93,6 +96,8 @@ void NetworkDriveClient::processMessage(QByteArray &message)
 
     messageDataStream >> messageType;
 
+    qDebug() << "process message" << messageType;
+
     switch(messageType)
     {
     case MOUNT:
@@ -103,6 +108,7 @@ void NetworkDriveClient::processMessage(QByteArray &message)
 
     case CREATE_FILE:
     {
+        qDebug() << "message is create file";
         qint32 currentMessageId = 0;
         QString filePath;
         quint64 AccessMode = 0;
@@ -111,8 +117,21 @@ void NetworkDriveClient::processMessage(QByteArray &message)
 
         messageDataStream >> currentMessageId >> filePath >> AccessMode >> CreateDisposition >> CreateOptions;
         QByteArray resultArray;
+        resultArray.append(messageType);
+        resultArray.append(currentMessageId);
         clientCreateFile(resultArray, filePath, AccessMode, CreateDisposition, CreateOptions);
 
+        if (m_socket)
+        {
+            QByteArray sizeData;
+            QDataStream sds(&sizeData, QIODevice::WriteOnly);
+            sds << (quint32) resultArray.size();
+
+            m_socket->write(sizeData);
+
+            qDebug() << "client side send stuff back";
+            m_socket->write(resultArray);
+        }
     }
         break;
     case CLOSE_FILE:
@@ -123,8 +142,20 @@ void NetworkDriveClient::processMessage(QByteArray &message)
 
         messageDataStream >> currentMessageId >>filePath >> context;
         QByteArray resultArray;
+        resultArray.append(messageType);
+        resultArray.append(currentMessageId);
 
         clientCloseFile(resultArray, filePath, context);
+
+        if (m_socket)
+        {
+            QByteArray sizeData;
+            QDataStream sds(&sizeData, QIODevice::WriteOnly);
+            sds << (quint32) resultArray.size();
+
+            m_socket->write(sizeData);
+            m_socket->write(resultArray);
+        }
     }
         break;
     case CLEAN_UP_FILE:
@@ -136,9 +167,20 @@ void NetworkDriveClient::processMessage(QByteArray &message)
 
         messageDataStream >> currentMessageId >> filePath >> DokanFileInfo_context >> DokanFileInfo_deleteOnClose;
         QByteArray resultArray;
+        resultArray.append(messageType);
+        resultArray.append(currentMessageId);
 
         clientCleanUp(resultArray, filePath, DokanFileInfo_context, DokanFileInfo_deleteOnClose);
 
+        if (m_socket)
+        {
+            QByteArray sizeData;
+            QDataStream sds(&sizeData, QIODevice::WriteOnly);
+            sds << (quint32) resultArray.size();
+
+            m_socket->write(sizeData);
+            m_socket->write(resultArray);
+        }
     }
         break;
     case READ_FILE:
@@ -152,8 +194,20 @@ void NetworkDriveClient::processMessage(QByteArray &message)
 
         messageDataStream >> currentMessageId >> filePath >> BufferLength >> ReadLength >> Offset >> DokanFileInfo_context;
         QByteArray resultArray;
+        resultArray.append(messageType);
+        resultArray.append(currentMessageId);
 
         clientReadFile(resultArray, filePath, BufferLength, Offset, DokanFileInfo_context);
+
+        if (m_socket)
+        {
+            QByteArray sizeData;
+            QDataStream sds(&sizeData, QIODevice::WriteOnly);
+            sds << (quint32) resultArray.size();
+
+            m_socket->write(sizeData);
+            m_socket->write(resultArray);
+        }
     }
         break;
     case WRITE_FILE:
@@ -169,8 +223,19 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath >> NumberOfBytesToWrite >> Offset >> DokanFileInfo_context >> dataBuffer;
 
         QByteArray resultArray;
-
+        resultArray.append(messageType);
+        resultArray.append(currentMessageId);
         clientWriteFile(resultArray, filePath, dataBuffer.data(), NumberOfBytesToWrite, Offset, DokanFileInfo_context);
+
+        if (m_socket)
+        {
+            QByteArray sizeData;
+            QDataStream sds(&sizeData, QIODevice::WriteOnly);
+            sds << (quint32) resultArray.size();
+
+            m_socket->write(sizeData);
+            m_socket->write(resultArray);
+        }
     }
         break;
     case FLUSH_FILE_BUFFERS:
@@ -182,9 +247,19 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath >> DokanFileInfo_context;
 
         QByteArray resultArray;
-
+        resultArray.append(messageType);
+        resultArray.append(currentMessageId);
         clientFlushFileBuffers(resultArray, filePath, DokanFileInfo_context);
 
+        if (m_socket)
+        {
+            QByteArray sizeData;
+            QDataStream sds(&sizeData, QIODevice::WriteOnly);
+            sds << (quint32) resultArray.size();
+
+            m_socket->write(sizeData);
+            m_socket->write(resultArray);
+        }
     }
         break;
     case GET_FILE_INFORMATION:
@@ -196,8 +271,19 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath >> DokanFileInfo_isDirectory;
 
         QByteArray resultArray;
+        resultArray.append(messageType);
+        resultArray.append(currentMessageId);
         clientGetFileInformation(resultArray, filePath, DokanFileInfo_isDirectory);
 
+        if (m_socket)
+        {
+            QByteArray sizeData;
+            QDataStream sds(&sizeData, QIODevice::WriteOnly);
+            sds << (quint32) resultArray.size();
+
+            m_socket->write(sizeData);
+            m_socket->write(resultArray);
+        }
     }
         break;
     case FIND_FILES:
@@ -208,9 +294,19 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath;
 
         QByteArray resultArray;
-
+        resultArray.append(messageType);
+        resultArray.append(currentMessageId);
         clientFindFiles(resultArray, filePath);
 
+        if (m_socket)
+        {
+            QByteArray sizeData;
+            QDataStream sds(&sizeData, QIODevice::WriteOnly);
+            sds << (quint32) resultArray.size();
+
+            m_socket->write(sizeData);
+            m_socket->write(resultArray);
+        }
     }
         break;
     case DELETE_FILE:
@@ -221,8 +317,19 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath;
 
         QByteArray resultArray;
-
+        resultArray.append(messageType);
+        resultArray.append(currentMessageId);
         clientDeleteFile(resultArray, filePath);
+
+        if (m_socket)
+        {
+            QByteArray sizeData;
+            QDataStream sds(&sizeData, QIODevice::WriteOnly);
+            sds << (quint32) resultArray.size();
+
+            m_socket->write(sizeData);
+            m_socket->write(resultArray);
+        }
     }
         break;
     case DELETE_DIRECTORY:
@@ -233,8 +340,19 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath;
 
         QByteArray resultArray;
-
+        resultArray.append(messageType);
+        resultArray.append(currentMessageId);
         clientDeleteDirectory(resultArray, filePath);
+
+        if (m_socket)
+        {
+            QByteArray sizeData;
+            QDataStream sds(&sizeData, QIODevice::WriteOnly);
+            sds << (quint32) resultArray.size();
+
+            m_socket->write(sizeData);
+            m_socket->write(resultArray);
+        }
     }
         break;
     case MOVE_FILE:
@@ -247,9 +365,19 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath >> NewFileName >> ReplaceIfExisting;
 
         QByteArray resultArray;
-
+        resultArray.append(messageType);
+        resultArray.append(currentMessageId);
         clientMoveFile(resultArray, filePath, NewFileName, ReplaceIfExisting);
 
+        if (m_socket)
+        {
+            QByteArray sizeData;
+            QDataStream sds(&sizeData, QIODevice::WriteOnly);
+            sds << (quint32) resultArray.size();
+
+            m_socket->write(sizeData);
+            m_socket->write(resultArray);
+        }
     }
         break;
     case LOCK_FILE:
@@ -263,9 +391,19 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath >> ByteOffset >> Length >> DokanFileInfo_context;
 
         QByteArray resultArray;
-
+        resultArray.append(messageType);
+        resultArray.append(currentMessageId);
         clientLockFile(resultArray, filePath, ByteOffset, Length, DokanFileInfo_context);
 
+        if (m_socket)
+        {
+            QByteArray sizeData;
+            QDataStream sds(&sizeData, QIODevice::WriteOnly);
+            sds << (quint32) resultArray.size();
+
+            m_socket->write(sizeData);
+            m_socket->write(resultArray);
+        }
     }
         break;
     case SET_END_OF_FILE:
@@ -278,9 +416,19 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath >> ByteOffset >> DokanFileInfo_context;
 
         QByteArray resultArray;
-
+        resultArray.append(messageType);
+        resultArray.append(currentMessageId);
         clientSetEndOfFile(resultArray, filePath, ByteOffset, DokanFileInfo_context);
 
+        if (m_socket)
+        {
+            QByteArray sizeData;
+            QDataStream sds(&sizeData, QIODevice::WriteOnly);
+            sds << (quint32) resultArray.size();
+
+            m_socket->write(sizeData);
+            m_socket->write(resultArray);
+        }
     }
         break;
     case SET_ALLOCATION_SIZE:
@@ -293,9 +441,19 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath >> AllocSize >> DokanFileInfo_context;
 
         QByteArray resultArray;
-
+        resultArray.append(messageType);
+        resultArray.append(currentMessageId);
         clientSetAllocationSize(resultArray, filePath, AllocSize, DokanFileInfo_context);
 
+        if (m_socket)
+        {
+            QByteArray sizeData;
+            QDataStream sds(&sizeData, QIODevice::WriteOnly);
+            sds << (quint32) resultArray.size();
+
+            m_socket->write(sizeData);
+            m_socket->write(resultArray);
+        }
     }
         break;
     case SET_FILE_ATTRIBUTES:
@@ -308,8 +466,19 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath >> FileAttributes >> DokanFileInfo_context;
 
         QByteArray resultArray;
-
+        resultArray.append(messageType);
+        resultArray.append(currentMessageId);
         clientSetFileAttributes(resultArray, filePath, FileAttributes, DokanFileInfo_context);
+
+        if (m_socket)
+        {
+            QByteArray sizeData;
+            QDataStream sds(&sizeData, QIODevice::WriteOnly);
+            sds << (quint32) resultArray.size();
+
+            m_socket->write(sizeData);
+            m_socket->write(resultArray);
+        }
     }
         break;
     case SET_FILE_TIME:
@@ -324,8 +493,19 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath >> CreationTime >> LastAccessTime >> LastWriteTime >> DokanFileInfo_context;
 
         QByteArray resultArray;
-
+        resultArray.append(messageType);
+        resultArray.append(currentMessageId);
         clientSetFileTime(resultArray, filePath, CreationTime, LastAccessTime, LastWriteTime, DokanFileInfo_context);
+
+        if (m_socket)
+        {
+            QByteArray sizeData;
+            QDataStream sds(&sizeData, QIODevice::WriteOnly);
+            sds << (quint32) resultArray.size();
+
+            m_socket->write(sizeData);
+            m_socket->write(resultArray);
+        }
     }
         break;
     case UNLOCK_FILE:
@@ -339,8 +519,19 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath >> ByteOffset >> Length >> DokanFileInfo_context;
 
         QByteArray resultArray;
-
+        resultArray.append(messageType);
+        resultArray.append(currentMessageId);
         clientUnlockFile(resultArray, filePath, ByteOffset, Length, DokanFileInfo_context);
+
+        if (m_socket)
+        {
+            QByteArray sizeData;
+            QDataStream sds(&sizeData, QIODevice::WriteOnly);
+            sds << (quint32) resultArray.size();
+
+            m_socket->write(sizeData);
+            m_socket->write(resultArray);
+        }
     }
         break;
     case GET_FILE_SECURITY:
@@ -356,8 +547,19 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath >> SecurityInformation >> SecurityDescriptor >> BufferLength >> LengthNeeded >> DokanFileInfo_context;
 
         QByteArray resultArray;
-
+        resultArray.append(messageType);
+        resultArray.append(currentMessageId);
         clientGetFileSecurity(resultArray, filePath, SecurityInformation, SecurityDescriptor, BufferLength, LengthNeeded, DokanFileInfo_context);
+
+        if (m_socket)
+        {
+            QByteArray sizeData;
+            QDataStream sds(&sizeData, QIODevice::WriteOnly);
+            sds << (quint32) resultArray.size();
+
+            m_socket->write(sizeData);
+            m_socket->write(resultArray);
+        }
     }
         break;
     case SET_FILE_SECURITY:
@@ -372,9 +574,19 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream >> currentMessageId >> filePath << SecurityInformation << SecurityDescriptor << SecurityDescriptorLength << DokanFileInfo_context;
 
         QByteArray resultArray;
-
+        resultArray.append(messageType);
+        resultArray.append(currentMessageId);
         clientSetFileSecurity(resultArray, filePath, SecurityInformation, SecurityDescriptor, SecurityDescriptorLength, DokanFileInfo_context);
 
+        if (m_socket)
+        {
+            QByteArray sizeData;
+            QDataStream sds(&sizeData, QIODevice::WriteOnly);
+            sds << (quint32) resultArray.size();
+
+            m_socket->write(sizeData);
+            m_socket->write(resultArray);
+        }
     }
         break;
     case GET_VOLUME_INFORMATION:
@@ -392,8 +604,14 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         messageDataStream  >> currentMessageId >> VolumeNameBuffer >> VolumeNameSize >> VolumeSerialNumber >> MaximumComponentLength >> FileSystemFlags >> FileSystemNameBuffer >> FileSystemNameSize;
 
         QByteArray resultArray;
-
+        resultArray.append(messageType);
+        resultArray.append(currentMessageId);
       //  clientGetVolumeInformation(resultArray, VolumeNameBuffer, VolumeNameSize, VolumeSerialNumber, MaximumComponentLength, FileSystemFlags, FileSystemNameBuffer, FileSystemNameSize);
+
+       /* if (m_socket)
+        {
+            m_socket->write(resultArray);
+        }*/
     }
         break;
     case UNMOUNT:

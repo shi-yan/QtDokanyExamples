@@ -19,7 +19,9 @@ SOURCES += \
     main.cpp \
     NetworkDrive.cpp \
     NetworkDriveServer.cpp \
-    NetworkDriveClient.cpp
+    NetworkDriveClient.cpp \
+    FileSystemThread.cpp \
+    NetworkThread.cpp
 
 HEADERS += \
     DokanDrive.h \
@@ -28,7 +30,9 @@ HEADERS += \
     NetworkDrive.h \
     NetworkDriveServer.h \
     NetworkDriveProtocol.h \
-    NetworkDriveClient.h
+    NetworkDriveClient.h \
+    FileSystemThread.h \
+    NetworkThread.h
 
 LIBS += -lUser32 \
         -lAdvapi32 \

@@ -3,13 +3,16 @@
 
 #include "DokanDriveImplementation.h"
 #include "NetworkDriveClient.h"
+#include "NetworkDriveServer.h"
 
 class NetworkDrive : public DokanDriveImplementation
 {
 private:
-    NetworkDriveClient *m_client;
+    //NetworkDriveClient *m_client;
+    NetworkDriveServer *m_server;
+
 public:
-    NetworkDrive();
+    NetworkDrive(NetworkDriveServer *server);
     ~NetworkDrive();
 
     NTSTATUS MirrorCreateFile(LPCWSTR FileName, PDOKAN_IO_SECURITY_CONTEXT SecurityContext, ACCESS_MASK AccessMode, ULONG FileAttributes, ULONG ShareMode, ULONG CreateDisposition, ULONG CreateOptions, PDOKAN_FILE_INFO DokanFileInfo);

@@ -1,13 +1,15 @@
-#include "LocalDrive.h"
-#include "DokanDrive.h"
-#include "NetworkDrive.h"
+#include "FileSystemThread.h"
+#include "NetworkDriveClient.h"
+#include <QCoreApplication>
 
 int main(int argc, char *argv[])
 {
-    //LocalDrive *localDrive = new LocalDrive();
+    QCoreApplication app(argc, argv);
 
-    NetworkDrive *networkDrive = new NetworkDrive();
+    FileSystemThread *fsThread = new FileSystemThread();
 
-    DokanMirrorDriveInterface::mount(networkDrive);
-
+    fsThread->start();
+    NetworkDriveClient *networkDriveClient = new NetworkDriveClient();
+    networkDriveClient->connectToServer();
+    return app.exec();
 }
