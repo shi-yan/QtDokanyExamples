@@ -26,7 +26,7 @@ int DokanMirrorDriveInterface::mount(DokanDriveImplementation *implementation)
     dokanOptions->ThreadCount = 1;
     QString mountPoint = "m";
     dokanOptions->MountPoint = (const wchar_t*) mountPoint.utf16();
-    dokanOptions->Options |= DOKAN_OPTION_DEBUG;
+    //dokanOptions->Options |= DOKAN_OPTION_DEBUG;
     dokanOptions->Options |= DOKAN_OPTION_STDERR;
     dokanOptions->Options |= DOKAN_OPTION_ALT_STREAM;
 

@@ -24,7 +24,8 @@ void NetworkDriveServer::RequestBarrier::release()
 
 void NetworkDriveServer::RequestBarrier::dumpData(const QByteArray &data)
 {
-    m_data.append(data);
+    quint32 offset = sizeof(quint32) + sizeof(qint32);
+    m_data.append(data.data() + offset, data.size() - offset);
 }
 
 void NetworkDriveServer::RequestBarrier::getData(QByteArray &out)
@@ -53,7 +54,7 @@ void NetworkDriveServer::incomingConnection(qintptr handle)
 
 void NetworkDriveServer::onSocketReadyRead()
 {
-    qDebug() << "server received something";
+    //qDebug() << "server received something";
     m_dataBuffer.append(m_socket->readAll());
     processData();
 }
@@ -105,7 +106,7 @@ void NetworkDriveServer::processMessage(QByteArray &message)
 
     messageStream >> messageId;
 
-    qDebug() << "server process message" << messageType << messageId;
+    //qDebug() << "server process message" << messageType << messageId;
 
 
     switch(messageType)
@@ -115,7 +116,7 @@ void NetworkDriveServer::processMessage(QByteArray &message)
     case UNMOUNT:
         break;
     case CREATE_FILE:
-        qDebug() << "create file";
+        //qDebug() << "create file";
         m_semaphoreTable[messageId]->dumpData(message);
         m_semaphoreTable[messageId]->release();
         break;
@@ -216,10 +217,10 @@ void NetworkDriveServer::remoteCreateFile(QByteArray &result,const QString &file
 
 
     emit sendMessageToClient(messageArray);
-    qDebug() << "-------- before the acquire";
+    //qDebug() << "-------- before the acquire";
     semaphore->acquire();
 
-    qDebug() << "-------- after the acquire";
+    //qDebug() << "-------- after the acquire";
 
     semaphore->getData(result);
     m_semaphoreTable.remove(currentMessageId);

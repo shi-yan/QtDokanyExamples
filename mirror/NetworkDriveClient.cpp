@@ -36,7 +36,7 @@ void NetworkDriveClient::connectToServer()
 {
     if (!m_socket)
     {
-        qDebug() << "connect to server";
+        //qDebug() << "connect to server";
         m_socket = new QTcpSocket(this);
         m_socket->connectToHost(QHostAddress::LocalHost, 12345);
 
@@ -46,7 +46,7 @@ void NetworkDriveClient::connectToServer()
 
 void NetworkDriveClient::onSocketReadyRead()
 {
-    qDebug() << "received data";
+    //qDebug() << "received data";
     m_dataBuffer.append(m_socket->readAll());
     processData();
 }
@@ -75,7 +75,7 @@ void NetworkDriveClient::processData()
         if (m_currentDataSize != -1 && m_dataBuffer.size() >= m_currentDataSize)
         {
             QByteArray messageData(m_dataBuffer.data(), m_currentDataSize);
-            qDebug() << "datasize" << m_currentDataSize;
+            //qDebug() << "datasize" << m_currentDataSize;
             m_dataBuffer.remove(0, m_currentDataSize);
             m_currentDataSize = -1;
             processMessage(messageData);
@@ -96,7 +96,7 @@ void NetworkDriveClient::processMessage(QByteArray &message)
 
     messageDataStream >> messageType;
 
-    qDebug() << "process message" << messageType;
+    //qDebug() << "process message" << messageType;
 
     switch(messageType)
     {
@@ -108,7 +108,7 @@ void NetworkDriveClient::processMessage(QByteArray &message)
 
     case CREATE_FILE:
     {
-        qDebug() << "message is create file";
+        //qDebug() << "message is create file";
         qint32 currentMessageId = 0;
         QString filePath;
         quint64 AccessMode = 0;
@@ -130,7 +130,7 @@ void NetworkDriveClient::processMessage(QByteArray &message)
 
             m_socket->write(sizeData);
 
-            qDebug() << "client side send stuff back";
+            //qDebug() << "client side send stuff back";
             m_socket->write(resultArray);
         }
     }
@@ -664,26 +664,26 @@ void NetworkDriveClient::processMessage(QByteArray &message)
 void NetworkDriveClient::clientCreateFile(QByteArray &reply, const QString &fileName, quint64 AccessMode, quint64 CreateDisposition, quint64 CreateOptions)
 {
     QDataStream replyDataStream(&reply, QIODevice::WriteOnly);
-    qDebug() << "inside create file" << fileName;
-    qDebug() << "beginning"   << CreateDisposition;
+    //qDebug() << "inside create file" << fileName;
+    //qDebug() << "beginning"   << CreateDisposition;
 
     bool DokanFileInfo_isDirectory = false;
     QDir dir("c:\\test");
 
     QString filePath = dir.absoluteFilePath(fileName);
 
-    qDebug() << "create file ===================" << filePath;
+    //qDebug() << "create file ===================" << filePath;
 
     dir.setPath(filePath);
     QFileInfo fi(filePath);
-    qDebug() << "open" << filePath << "is dir?" << fi.isDir();
+    //qDebug() << "open" << filePath << "is dir?" << fi.isDir();
     if(((CreateOptions & FILE_DIRECTORY_FILE) == FILE_DIRECTORY_FILE) || fi.isDir())
     {
-        qDebug() << "open as dir";
+        //qDebug() << "open as dir";
         DokanFileInfo_isDirectory = true;
         if(CreateDisposition == FILE_CREATE)
         {
-            qDebug() << "create directory";
+            //qDebug() << "create directory";
 
             dir.setPath(filePath);
             if(dir.exists())
@@ -704,7 +704,7 @@ void NetworkDriveClient::clientCreateFile(QByteArray &reply, const QString &file
         }
         else if(CreateDisposition == FILE_OPEN_IF)
         {
-            qDebug() << "open directory" ;
+            //qDebug() << "open directory" ;
 
             dir.setPath(filePath);
             if(!dir.exists())
@@ -721,7 +721,7 @@ void NetworkDriveClient::clientCreateFile(QByteArray &reply, const QString &file
     }
     else
     {
-        qDebug() << "open as file" << filePath;
+        //qDebug() << "open as file" << filePath;
         bool pathExists = true;
         bool pathIsDirectory = false;
 
@@ -739,7 +739,7 @@ void NetworkDriveClient::clientCreateFile(QByteArray &reply, const QString &file
             openMode |= QFile::Append;
 
         bool DokanFileInfo_IsDirectory = false;
-        qDebug() << "debug path exists" << filePath << pathExists;
+        //qDebug() << "debug path exists" << filePath << pathExists;
         switch(CreateDisposition)
         {
         case OPEN_EXISTING:
@@ -748,9 +748,9 @@ void NetworkDriveClient::clientCreateFile(QByteArray &reply, const QString &file
                 if (readWriteAttribute || pathIsDirectory)
                 {
                    DokanFileInfo_IsDirectory = pathIsDirectory;
-                    qDebug() << "set dir" << pathIsDirectory;
+                    //qDebug() << "set dir" << pathIsDirectory;
                     quint64 DokanFileInfo_Context = 0;
-                    qDebug() << "debug 2";
+                    //qDebug() << "debug 2";
 
                     replyDataStream << (quint64) STATUS_SUCCESS << DokanFileInfo_Context << DokanFileInfo_IsDirectory;
                     return;
@@ -758,16 +758,16 @@ void NetworkDriveClient::clientCreateFile(QByteArray &reply, const QString &file
             }
             else
             {
-                qDebug() << "return object name not found";
+                //qDebug() << "return object name not found";
                 if (pathIsDirectory)
                 {
-                    qDebug() << "return path not found";
+                    //qDebug() << "return path not found";
                     replyDataStream << (quint64) STATUS_OBJECT_PATH_NOT_FOUND;
                     return;
                 }
                 else
                 {
-                    qDebug() << "return file not found";
+                    //qDebug() << "return file not found";
                     replyDataStream << (quint64) STATUS_OBJECT_NAME_NOT_FOUND;
                     return;
                 }
@@ -776,7 +776,7 @@ void NetworkDriveClient::clientCreateFile(QByteArray &reply, const QString &file
 
         case CREATE_NEW:
             if (pathExists)
-            {qDebug() << "debug 2";
+            {//qDebug() << "debug 2";
 
                 replyDataStream << (quint64) ERROR_FILE_EXISTS;
                 return;
@@ -787,7 +787,7 @@ void NetworkDriveClient::clientCreateFile(QByteArray &reply, const QString &file
             openMode |= QFile::Truncate;
             if (!pathExists)
             {
-                qDebug() << "debug 3";
+                //qDebug() << "debug 3";
 
                 replyDataStream << (quint64) ERROR_FILE_NOT_FOUND;
                 return;
@@ -801,7 +801,7 @@ void NetworkDriveClient::clientCreateFile(QByteArray &reply, const QString &file
             break;
         }
 
-        qDebug() << "trying to open this location:" << filePath;
+        //qDebug() << "trying to open this location:" << filePath;
 
         QFile *file = new QFile(filePath);
 
@@ -810,7 +810,7 @@ void NetworkDriveClient::clientCreateFile(QByteArray &reply, const QString &file
             quint64 DokanFileInfo_Context = (ULONG64) file;
             if(file->open(openMode))
             {
-                qDebug() << "success" << openMode;
+                //qDebug() << "success" << openMode;
                 replyDataStream << (quint64) STATUS_SUCCESS << DokanFileInfo_Context << DokanFileInfo_isDirectory;
 
                 return;
@@ -835,13 +835,13 @@ void NetworkDriveClient::clientCloseFile(QByteArray &reply, const QString &fileP
     if (DokanFileInfo_context)
     {
         QFile *file = (QFile*)DokanFileInfo_context;
-        qDebug() << "close" << file->fileName();
+        //qDebug() << "close" << file->fileName();
         file->close();
         DokanFileInfo_context = NULL;
     }
     else
     {
-        qDebug() << "------ no context defined to close" << filePath;
+        //qDebug() << "------ no context defined to close" << filePath;
     }
 }
 
@@ -858,11 +858,11 @@ void NetworkDriveClient::clientCleanUp(QByteArray &reply, const QString &fileNam
 
     QString filePath = dir.absoluteFilePath(fileName);
 
-    qDebug() << "cleanup" << filePath;
+    //qDebug() << "cleanup" << filePath;
 
     if (DokanFileInfo_deleteOnClose)
     {
-        qDebug() << "also delete";
+        //qDebug() << "also delete";
         dir.remove(filePath);
     }
     return ;
@@ -870,7 +870,7 @@ void NetworkDriveClient::clientCleanUp(QByteArray &reply, const QString &fileNam
 
 void NetworkDriveClient::clientReadFile(QByteArray &reply, const QString &fileName, quint64 BufferLength, quint64 Offset, quint64 DokanFileInfo_context)
 {
-    qDebug() << "########################## read file";
+    //qDebug() << "########################## read file";
 
 
     QDataStream replyDataStream(&reply, QIODevice::WriteOnly);
@@ -880,7 +880,7 @@ void NetworkDriveClient::clientReadFile(QByteArray &reply, const QString &fileNa
     if (DokanFileInfo_context)
     {
         QFile *file = (QFile*)DokanFileInfo_context;
-        qDebug() << "normal read" << file->fileName();
+        //qDebug() << "normal read" << file->fileName();
         file->seek(Offset);
         quint64 ReadLength = file->read((char*)buffer.data(), BufferLength);
         replyDataStream << ReadLength;
@@ -893,7 +893,7 @@ void NetworkDriveClient::clientReadFile(QByteArray &reply, const QString &fileNa
 
         QString filePath = dir.absoluteFilePath(fileName);
 
-        qDebug() << "memory mapped read" << filePath;
+        //qDebug() << "memory mapped read" << filePath;
         QFile file(filePath);
         file.open(QFile::ReadOnly);
         file.seek(Offset);
@@ -912,7 +912,7 @@ void NetworkDriveClient::clientWriteFile(QByteArray &reply, const QString &fileN
     if (DokanFileInfo_context)
     {
         QFile *file = (QFile*)DokanFileInfo_context;
-        qDebug() << "normal read" << file->fileName();
+        //qDebug() << "normal read" << file->fileName();
         file->seek(Offset);
         quint64 NumberOfBytesWritten = file->write((char*)buffer, NumberOfBytesToWrite);
         replyDataStream << NumberOfBytesWritten;
@@ -923,7 +923,7 @@ void NetworkDriveClient::clientWriteFile(QByteArray &reply, const QString &fileN
 
         QString filePath = dir.absoluteFilePath(fileName);
 
-        qDebug() << "memory mapped read" << filePath;
+        //qDebug() << "memory mapped read" << filePath;
         QFile file(filePath);
         file.open(QFile::ReadOnly);
         file.seek(Offset);
@@ -938,7 +938,7 @@ void NetworkDriveClient::clientFlushFileBuffers(QByteArray &reply, const QString
     if (DokanFileInfo_context)
     {
         QFile *file = (QFile*)DokanFileInfo_context;
-        qDebug() << "flush file" << file->fileName();
+        //qDebug() << "flush file" << file->fileName();
 
         file->flush();
     }
@@ -967,7 +967,7 @@ void NetworkDriveClient::clientGetFileInformation(QByteArray &reply, const QStri
 
     QString filePath = dir.absoluteFilePath(fileName);
 
-    qDebug() << "get file info ===================" << filePath;
+    //qDebug() << "get file info ===================" << filePath;
 
 
     QFileInfo fileInfo(filePath);
@@ -1002,8 +1002,8 @@ void NetworkDriveClient::clientGetFileInformation(QByteArray &reply, const QStri
     HandleFileInformation.nFileIndexHigh = 0;
     HandleFileInformation.nFileIndexLow = 0;
 
-    qDebug() << "size low" << size<<  HandleFileInformation.nFileSizeLow;
-    qDebug() << "size high" << size<<HandleFileInformation.nFileSizeHigh;
+    //qDebug() << "size low" << size<<  HandleFileInformation.nFileSizeLow;
+    //qDebug() << "size high" << size<<HandleFileInformation.nFileSizeHigh;
 
     QDataStream replyDataStream(&reply, QIODevice::WriteOnly);
     replyDataStream << (quint64) STATUS_SUCCESS << QByteArray((char*)&HandleFileInformation, sizeof(HandleFileInformation));
@@ -1017,12 +1017,12 @@ void NetworkDriveClient::clientFindFiles(QByteArray &reply, const QString &fileN
 
     QString filePath = dir.absoluteFilePath(fileName);
 
-    qDebug() << "findfiles ===================" << filePath;
+    //qDebug() << "findfiles ===================" << filePath;
 
     dir.setPath(filePath);
 
     QFileInfoList infoList = dir.entryInfoList();
-    qDebug() << "findfiles ===================" << filePath << infoList.size();
+    //qDebug() << "findfiles ===================" << filePath << infoList.size();
 
     QDataStream replyDataStream(&reply, QIODevice::WriteOnly);
     replyDataStream << (quint64) STATUS_SUCCESS;
@@ -1076,7 +1076,7 @@ void NetworkDriveClient::clientDeleteDirectory(QByteArray &reply, const QString 
 
     QString filePath = dir.absoluteFilePath(fileName);
 
-    qDebug() << "create folder" << filePath;
+    //qDebug() << "create folder" << filePath;
 
     dir.setPath(filePath);
 
@@ -1103,7 +1103,7 @@ void NetworkDriveClient::clientMoveFile(QByteArray &reply, const QString &filePa
 
     QString oldFilePath = olddir.absoluteFilePath(oldFileName);
 
-    qDebug() << "move folder" << oldFilePath;
+    //qDebug() << "move folder" << oldFilePath;
 
 
     QString newFileName = (NewFileName);
@@ -1113,7 +1113,7 @@ void NetworkDriveClient::clientMoveFile(QByteArray &reply, const QString &filePa
 
     QString newFilePath = newdir.absoluteFilePath(newFileName);
 
-    qDebug() << "move folder" << newFilePath;
+    //qDebug() << "move folder" << newFilePath;
 
 
     QFileInfo info(newFilePath);

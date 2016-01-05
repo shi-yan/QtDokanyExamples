@@ -19,7 +19,7 @@ NTSTATUS NetworkDrive::MirrorCreateFile(LPCWSTR FileName, PDOKAN_IO_SECURITY_CON
     QByteArray replyArray;
     QString fileName = getFileName(FileName);
 
-    qDebug() << "before calling client createfile" << fileName << CreateDisposition;
+    //qDebug() << "before calling client createfile" << fileName << CreateDisposition;
 
     m_server->remoteCreateFile(replyArray, fileName, AccessMode, CreateDisposition, CreateOptions);
 
@@ -88,7 +88,7 @@ NTSTATUS NetworkDrive::MirrorReadFile(LPCWSTR FileName, LPVOID Buffer, DWORD Buf
 
     resultStream >> buffer;
 
-    qDebug() << "read buffer" << buffer.size();
+    //qDebug() << "read buffer" << buffer.size();
 
     memcpy(Buffer, buffer.data(), readLength);
 
@@ -194,7 +194,7 @@ NTSTATUS NetworkDrive::MirrorFindFiles(LPCWSTR FileName, PFillFindData FillFindD
 
     resultStream >> dataCount;
 
-    qDebug() << "find how many files?" << dataCount;
+    //qDebug() << "find how many files?" << dataCount;
 
     for(int i = 0;i<dataCount;++i)
     {
@@ -411,7 +411,7 @@ NTSTATUS NetworkDrive::MirrorGetVolumeInformation(LPWSTR VolumeNameBuffer, DWORD
 
 NTSTATUS NetworkDrive::MirrorUnmount(PDOKAN_FILE_INFO	DokanFileInfo)
 {
-    qDebug() << "Unmount";
+    //qDebug() << "Unmount";
     return STATUS_SUCCESS;
 }
 
