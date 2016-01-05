@@ -46,12 +46,14 @@ void NetworkDriveServer::incomingConnection(qintptr handle)
     {
         m_socket = new QTcpSocket(this);
         connect(this, SIGNAL(sendMessageToClient(QByteArray*)),this,SLOT(onSendMessageToClient(QByteArray*)), Qt::QueuedConnection);
+        connect(m_socket, SIGNAL(readyRead()),this,SLOT(onSocketReadyRead()));
         m_socket->setSocketDescriptor(handle);
     }
 }
 
 void NetworkDriveServer::onSocketReadyRead()
 {
+    qDebug() << "server received something";
     m_dataBuffer.append(m_socket->readAll());
     processData();
 }
@@ -102,6 +104,9 @@ void NetworkDriveServer::processMessage(QByteArray &message)
     qint32 messageId = 0;
 
     messageStream >> messageId;
+
+    qDebug() << "server process message" << messageType << messageId;
+
 
     switch(messageType)
     {
@@ -211,7 +216,10 @@ void NetworkDriveServer::remoteCreateFile(QByteArray &result,const QString &file
 
 
     emit sendMessageToClient(messageArray);
+    qDebug() << "-------- before the acquire";
     semaphore->acquire();
+
+    qDebug() << "-------- after the acquire";
 
     semaphore->getData(result);
     m_semaphoreTable.remove(currentMessageId);
