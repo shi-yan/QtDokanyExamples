@@ -190,7 +190,7 @@ NTSTATUS LocalDrive::MirrorReadFile(LPCWSTR FileName, LPVOID Buffer, DWORD Buffe
     if (DokanFileInfo->Context)
     {
         QFile *file = (QFile*)DokanFileInfo->Context;
-        qDebug() << "normal read" << file->fileName();
+        qDebug() << "normal read" << file->fileName() << BufferLength;
         file->seek(Offset);
         *ReadLength = file->read((char*)Buffer, BufferLength);
     }
@@ -202,11 +202,12 @@ NTSTATUS LocalDrive::MirrorReadFile(LPCWSTR FileName, LPVOID Buffer, DWORD Buffe
 
         QString filePath = dir.absoluteFilePath(fileName);
 
-        qDebug() << "memory mapped read" << filePath;
         QFile file(filePath);
         file.open(QFile::ReadOnly);
         file.seek(Offset);
         *ReadLength = file.read((char*)Buffer, BufferLength);
+        qDebug() << "memory mapped read" << filePath << BufferLength << Offset << *ReadLength;
+
         file.close();
     }
 

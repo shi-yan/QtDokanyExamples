@@ -45,7 +45,7 @@ protected:
     QString getFileName(LPCWSTR FileName)
     {
         QString fileName = QString::fromStdWString(FileName);
-        qDebug() << "inside get file name" << fileName;
+        //qDebug() << "inside get file name" << fileName;
         fileName = fileName.right(fileName.size() - 1);
         return fileName;
     }

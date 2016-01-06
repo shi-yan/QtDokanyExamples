@@ -189,11 +189,10 @@ void NetworkDriveClient::processMessage(QByteArray &message)
         qint32 currentMessageId = 0;
         QString filePath;
         quint64 BufferLength = 0;
-        quint64 ReadLength = 0;
         quint64 Offset = 0;
         quint64 DokanFileInfo_context = 0;
 
-        messageDataStream >> currentMessageId >> filePath >> BufferLength >> ReadLength >> Offset >> DokanFileInfo_context;
+        messageDataStream >> currentMessageId >> filePath >> BufferLength  >> Offset >> DokanFileInfo_context;
         QByteArray resultArray;
 
         clientReadFile(resultArray, filePath, BufferLength, Offset, DokanFileInfo_context);
@@ -880,11 +879,11 @@ void NetworkDriveClient::clientReadFile(QByteArray &reply, const QString &fileNa
     if (DokanFileInfo_context)
     {
         QFile *file = (QFile*)DokanFileInfo_context;
-        //qDebug() << "normal read" << file->fileName();
+        qDebug() << "normal read" << file->fileName();
         file->seek(Offset);
         quint64 ReadLength = file->read((char*)buffer.data(), BufferLength);
         replyDataStream << ReadLength;
-        replyDataStream << buffer;
+        replyDataStream << QByteArray(buffer.data(), ReadLength);
     }
     else
     {
@@ -893,13 +892,14 @@ void NetworkDriveClient::clientReadFile(QByteArray &reply, const QString &fileNa
 
         QString filePath = dir.absoluteFilePath(fileName);
 
-        //qDebug() << "memory mapped read" << filePath;
+        qDebug() << "memory mapped read" << filePath << Offset;
         QFile file(filePath);
         file.open(QFile::ReadOnly);
         file.seek(Offset);
         quint64 ReadLength = file.read((char*)buffer.data(), BufferLength);
         replyDataStream << ReadLength;
-        replyDataStream << buffer;
+        replyDataStream << QByteArray(buffer.data(), ReadLength);
+        qDebug() << "client size buffer" << buffer.size();
         file.close();
     }
 }

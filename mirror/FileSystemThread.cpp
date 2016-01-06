@@ -19,10 +19,11 @@ void FileSystemThread::run()
     while(!netThread->getNetworkDriveServer());
 
     NetworkDrive *networkDrive = new NetworkDrive(netThread->getNetworkDriveServer());
-
-
+    DokanMirrorDriveInterface::mount(networkDrive);
+/*
+    LocalDrive *localDrive = new LocalDrive();
+    DokanMirrorDriveInterface::mount(localDrive);*/
    // exec();
 
-    DokanMirrorDriveInterface::mount(networkDrive);
 }
 

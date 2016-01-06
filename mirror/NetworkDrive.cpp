@@ -50,6 +50,8 @@ void NetworkDrive::MirrorCloseFile(LPCWSTR FileName, PDOKAN_FILE_INFO DokanFileI
 
     //m_client->clientCloseFile(replyArray, fileName, (quint64) DokanFileInfo->Context);
     m_server->remoteCloseFile(replyArray, fileName, (quint64) DokanFileInfo->Context);
+    DokanFileInfo->Context = NULL;
+
 }
 
 void NetworkDrive::MirrorCleanup(LPCWSTR FileName, PDOKAN_FILE_INFO DokanFileInfo)
@@ -88,11 +90,11 @@ NTSTATUS NetworkDrive::MirrorReadFile(LPCWSTR FileName, LPVOID Buffer, DWORD Buf
 
     resultStream >> buffer;
 
-    //qDebug() << "read buffer" << buffer.size();
+    qDebug() << "read buffer" << buffer.size() << readLength;
 
     memcpy(Buffer, buffer.data(), readLength);
 
-    return result;
+    return STATUS_SUCCESS;
 }
 
 NTSTATUS NetworkDrive::MirrorWriteFile(LPCWSTR FileName, LPCVOID Buffer, DWORD	NumberOfBytesToWrite, LPDWORD NumberOfBytesWritten, LONGLONG Offset, PDOKAN_FILE_INFO DokanFileInfo)
@@ -117,7 +119,7 @@ NTSTATUS NetworkDrive::MirrorWriteFile(LPCWSTR FileName, LPCVOID Buffer, DWORD	N
 
     *NumberOfBytesWritten = writeLength;
 
-    return result;
+    return STATUS_SUCCESS;
 
 }
 
@@ -171,6 +173,7 @@ NTSTATUS NetworkDrive::MirrorGetFileInformation(LPCWSTR FileName, LPBY_HANDLE_FI
     HandleFileInformation->nFileIndexHigh = handleFileInformation.nFileIndexHigh;
     HandleFileInformation->nFileIndexLow = handleFileInformation.nFileIndexLow;
 
+    qDebug() << HandleFileInformation->nFileSizeLow << HandleFileInformation->nFileSizeHigh;
 
     return result;
 }
