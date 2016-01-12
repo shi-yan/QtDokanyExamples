@@ -9,13 +9,13 @@ int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
 
-    QCoreApplication::setApplicationName("Qt Dokany Example");
+    QCoreApplication::setApplicationName("Qt Dokany Mirror Example");
     QCoreApplication::setApplicationVersion("0.1");
 
     QCommandLineParser parser;
-    parser.setApplicationDescription("This is an example of using Qt to implement a dokany driver"
-                                     "It tries to implement a mirror drive similar to the one included in the dokany project."
-                                     "You need to use -d to specify a local folder, and -l to specify the drive letter."
+    parser.setApplicationDescription("This is an example of using Qt to implement a dokany driver. \n"
+                                     "It tries to implement a mirror drive similar to the one included in the dokany project. \n"
+                                     "You need to use -d to specify a local folder, and -l to specify the drive letter. \n"
                                      "Example: mirror.exe -d c:\\test -l m");
     parser.addHelpOption();
     parser.addVersionOption();

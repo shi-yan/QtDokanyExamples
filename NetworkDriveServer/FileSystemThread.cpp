@@ -4,20 +4,17 @@
 #include "NetworkDriveClient.h"
 #include "NetworkThread.h"
 
-FileSystemThread::FileSystemThread()
+FileSystemThread::FileSystemThread(const QString &directory, const QString &letter, NetworkDriveServer *server)
+    :m_directory(directory),
+      m_letter(letter),
+      m_server(server)
 {
 
 }
 
 void FileSystemThread::run()
 {
-
-    NetworkThread *netThread = new NetworkThread();
-    netThread->start();
-
-    while(!netThread->getNetworkDriveServer());
-
-    NetworkDrive *networkDrive = new NetworkDrive("c:\\test", netThread->getNetworkDriveServer());
-    DokanMirrorDriveInterface::mount("m", networkDrive);
+    NetworkDrive *networkDrive = new NetworkDrive(m_directory, m_server);
+    DokanMirrorDriveInterface::mount(m_letter, networkDrive);
 }
 

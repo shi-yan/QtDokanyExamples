@@ -11,9 +11,11 @@ private:
     QTcpSocket *m_socket;
     QByteArray m_dataBuffer;
     qint64 m_currentDataSize;
+    const QString m_driveLetter;
+    const QString m_directory;
 
 public:
-    NetworkDriveClient();
+    NetworkDriveClient(const QString &directory, const QString &driveLetter);
     ~NetworkDriveClient();
 
     void connectToServer();
@@ -22,6 +24,7 @@ public:
 
 private slots:
     void onSocketReadyRead();
+    void onSocketConnected();
 
 public:
     void clientCreateFile(QByteArray &reply, const QString &filePath, quint64 AccessMode, quint64 CreateDisposition, quint64 CreateOptions);

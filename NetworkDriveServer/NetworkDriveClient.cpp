@@ -18,10 +18,12 @@ const DWORD DataAccess = FILE_READ_DATA | FILE_WRITE_DATA | FILE_APPEND_DATA |
 const DWORD DataWriteAccess = FILE_WRITE_DATA | FILE_APPEND_DATA | 65536 | FILE_GENERIC_WRITE;
 
 
-NetworkDriveClient::NetworkDriveClient()
+NetworkDriveClient::NetworkDriveClient(const QString &directory, const QString &driveLetter)
     :m_socket(NULL),
       m_dataBuffer(),
-      m_currentDataSize(-1)
+      m_currentDataSize(-1),
+      m_directory(directory),
+      m_driveLetter(driveLetter)
 {
 
 }
@@ -35,17 +37,15 @@ void NetworkDriveClient::connectToServer()
 {
     if (!m_socket)
     {
-        //qDebug() << "connect to server";
         m_socket = new QTcpSocket(this);
         m_socket->connectToHost(QHostAddress::LocalHost, 12345);
-
+        connect(m_socket, SIGNAL(connected()), this, SLOT(onSocketConnected()));
         connect(m_socket, SIGNAL(readyRead()), this, SLOT(onSocketReadyRead()));
     }
 }
 
 void NetworkDriveClient::onSocketReadyRead()
 {
-    //qDebug() << "received data";
     m_dataBuffer.append(m_socket->readAll());
     processData();
 }
@@ -666,7 +666,7 @@ void NetworkDriveClient::clientCreateFile(QByteArray &reply, const QString &file
     //qDebug() << "beginning"   << CreateDisposition;
 
     bool DokanFileInfo_isDirectory = false;
-    QDir dir("c:\\test");
+    QDir dir(m_directory);
 
     QString filePath = dir.absoluteFilePath(fileName);
 
@@ -852,7 +852,7 @@ void NetworkDriveClient::clientCleanUp(QByteArray &reply, const QString &fileNam
         DokanFileInfo_context = 0;
     }
 
-    QDir dir("c:\\test");
+    QDir dir(m_directory);
 
     QString filePath = dir.absoluteFilePath(fileName);
 
@@ -887,7 +887,7 @@ void NetworkDriveClient::clientReadFile(QByteArray &reply, const QString &fileNa
     else
     {
 
-        QDir dir("c:\\test");
+        QDir dir(m_directory);
 
         QString filePath = dir.absoluteFilePath(fileName);
 
@@ -918,7 +918,7 @@ void NetworkDriveClient::clientWriteFile(QByteArray &reply, const QString &fileN
     }
     else
     {
-        QDir dir("c:\\test");
+        QDir dir(m_directory);
 
         QString filePath = dir.absoluteFilePath(fileName);
 
@@ -962,7 +962,7 @@ static FILETIME toWinFileTime(const QDateTime &dateTime)
 
 void NetworkDriveClient::clientGetFileInformation(QByteArray &reply, const QString &fileName, bool DokanFileInfo_isDirectory)
 {
-    QDir dir("c:\\test");
+    QDir dir(m_directory);
 
     QString filePath = dir.absoluteFilePath(fileName);
 
@@ -1012,7 +1012,7 @@ void NetworkDriveClient::clientGetFileInformation(QByteArray &reply, const QStri
 
 void NetworkDriveClient::clientFindFiles(QByteArray &reply, const QString &fileName)
 {
-    QDir dir("c:\\test");
+    QDir dir(m_directory);
 
     QString filePath = dir.absoluteFilePath(fileName);
 
@@ -1071,7 +1071,7 @@ void NetworkDriveClient::clientDeleteFile(QByteArray &reply, const QString &file
 void NetworkDriveClient::clientDeleteDirectory(QByteArray &reply, const QString &fileName)
 {
 
-    QDir dir("c:\\test");
+    QDir dir(m_directory);
 
     QString filePath = dir.absoluteFilePath(fileName);
 
@@ -1098,7 +1098,7 @@ void NetworkDriveClient::clientMoveFile(QByteArray &reply, const QString &filePa
     QString oldFileName = filePath;
     oldFileName = oldFileName.right(oldFileName.size() - 1);
 
-    QDir olddir("c:\\test");
+    QDir olddir(m_directory);
 
     QString oldFilePath = olddir.absoluteFilePath(oldFileName);
 
@@ -1108,7 +1108,7 @@ void NetworkDriveClient::clientMoveFile(QByteArray &reply, const QString &filePa
     QString newFileName = (NewFileName);
     newFileName = newFileName.right(newFileName.size() - 1);
 
-    QDir newdir("c:\\test");
+    QDir newdir(m_directory);
 
     QString newFilePath = newdir.absoluteFilePath(newFileName);
 
@@ -1224,4 +1224,24 @@ void NetworkDriveClient::clientEnumerateNamedStreams(QByteArray &reply, const QS
     QDataStream replyDataStream(&reply, QIODevice::WriteOnly);
 
     replyDataStream << (quint64) STATUS_SUCCESS;
+}
+
+void NetworkDriveClient::onSocketConnected()
+{
+    qDebug() << "mount";
+    quint32 messageType = MOUNT;
+    qint32 currentMessageId = 0;
+
+    QByteArray mountArray;
+    QDataStream mstream(&mountArray, QIODevice::WriteOnly);
+    mstream << m_directory << m_driveLetter;
+
+    QByteArray sizeData;
+    QDataStream sds(&sizeData, QIODevice::WriteOnly);
+    sds << (quint32) (mountArray.size() + sizeof(quint32) + sizeof(qint32));
+    sds << messageType;
+    sds << currentMessageId;
+
+    m_socket->write(sizeData);
+    m_socket->write(mountArray);
 }

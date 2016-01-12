@@ -1,5 +1,6 @@
 #include "NetworkDriveServer.h"
 #include <QDataStream>
+#include "FileSystemThread.h"
 
 NetworkDriveServer::RequestBarrier::RequestBarrier(qint32 messageId)
     :m_messageId(messageId)
@@ -54,7 +55,7 @@ void NetworkDriveServer::incomingConnection(qintptr handle)
 
 void NetworkDriveServer::onSocketReadyRead()
 {
-    //qDebug() << "server received something";
+    qDebug() << "server received something";
     m_dataBuffer.append(m_socket->readAll());
     processData();
 }
@@ -75,6 +76,8 @@ void NetworkDriveServer::processData()
                 quint32 size;
                 stream >> size;
                 m_currentDataSize = size;
+
+                qDebug() << m_currentDataSize;
 
                 m_dataBuffer.remove(0, sizeof(quint32));
             }
@@ -106,12 +109,23 @@ void NetworkDriveServer::processMessage(QByteArray &message)
 
     messageStream >> messageId;
 
-    //qDebug() << "server process message" << messageType << messageId;
+    qDebug() << "server process message" << messageType << messageId;
 
 
     switch(messageType)
     {
     case MOUNT:
+    {
+        QString directory;
+        QString letter;
+        messageStream >> directory >> letter;
+
+        qDebug() << "mount" << directory << "as drive" << letter;
+
+        FileSystemThread *fsThread = new FileSystemThread(directory, letter, this);
+        fsThread->start();
+
+    }
         break;
     case UNMOUNT:
         break;
