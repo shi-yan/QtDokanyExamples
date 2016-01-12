@@ -4,35 +4,8 @@
 #include <QDataStream>
 #include <QDateTime>
 #include <QDir>
-//#include <windows.h>
-#undef WIN32_NO_STATUS
-
-#ifdef __APPLE__
-#define ULONG unsigned long
-#define BOOLEAN bool
-#define WCHAR short
-#define LONG long
-#define DWORD unsigned long int
-#define LONGLONG long long
-
-typedef union _LARGE_INTEGER {
-  struct {
-    DWORD LowPart;
-    LONG  HighPart;
-  };
-  struct {
-    DWORD LowPart;
-    LONG  HighPart;
-  } u;
-  LONGLONG QuadPart;
-} LARGE_INTEGER, *PLARGE_INTEGER;
-
-#define CCHAR char
-#define USHORT unsigned short
-#define UCHAR unsigned char
-
-#endif
-
+//#include <Windows.h>
+#include "WindowsDefines.h"
 //#include <winbase.h>
 //#include <ntstatus.h>
 #include <stdio.h>
