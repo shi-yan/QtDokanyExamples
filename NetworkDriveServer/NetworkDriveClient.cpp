@@ -971,41 +971,52 @@ void NetworkDriveClient::clientGetFileInformation(QByteArray &reply, const QStri
 
     QFileInfo fileInfo(filePath);
 
-    BY_HANDLE_FILE_INFORMATION HandleFileInformation;
+    //BY_HANDLE_FILE_INFORMATION HandleFileInformation;
 
-    HandleFileInformation.ftCreationTime = toWinFileTime(fileInfo.created());
-    HandleFileInformation.ftLastAccessTime = toWinFileTime(fileInfo.lastRead());
-    HandleFileInformation.ftLastWriteTime = toWinFileTime(fileInfo.lastModified());
-    HandleFileInformation.dwFileAttributes = FILE_ATTRIBUTE_ARCHIVE;
+
+    QDateTime ftCreationTime = fileInfo.created();
+    QDateTime ftLastAccessTime = fileInfo.lastRead();
+    QDateTime ftLastWriteTime = fileInfo.lastModified();
+
+    quint64 dwFileAttributes = FILE_ATTRIBUTE_ARCHIVE;
     if (fileInfo.isDir())
-        HandleFileInformation.dwFileAttributes =0 ;
+    {
+        dwFileAttributes =0;
+    }
     if (fileInfo.isHidden())
     {
-        HandleFileInformation.dwFileAttributes |= FILE_ATTRIBUTE_HIDDEN;
+        dwFileAttributes |= FILE_ATTRIBUTE_HIDDEN;
     }
 
     quint64 size = fileInfo.size();
 
-    HandleFileInformation.nFileSizeLow = size & 0xffffffff;
-    HandleFileInformation.nFileSizeHigh = size >> 32;
+    //HandleFileInformation.nFileSizeLow = size & 0xffffffff;
+    //HandleFileInformation.nFileSizeHigh = size >> 32;
 
     if( DokanFileInfo_isDirectory)
     {
-        HandleFileInformation.dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY;
-        HandleFileInformation.nFileSizeLow = 4096;
+        dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY;
     }
 
-    HandleFileInformation.dwVolumeSerialNumber = 0x19831116;
+    quint64 dwVolumeSerialNumber = 0x19831116;
+    quint64 nNumberOfLinks = 1;
 
-    HandleFileInformation.nNumberOfLinks = 1;
-    HandleFileInformation.nFileIndexHigh = 0;
-    HandleFileInformation.nFileIndexLow = 0;
+ //   HandleFileInformation.nNumberOfLinks = 1;
+  //  HandleFileInformation.nFileIndexHigh = 0;
+   // HandleFileInformation.nFileIndexLow = 0;
 
     //qDebug() << "size low" << size<<  HandleFileInformation.nFileSizeLow;
     //qDebug() << "size high" << size<<HandleFileInformation.nFileSizeHigh;
 
     QDataStream replyDataStream(&reply, QIODevice::WriteOnly);
-    replyDataStream << (quint64) STATUS_SUCCESS << QByteArray((char*)&HandleFileInformation, sizeof(HandleFileInformation));
+    replyDataStream << (quint64) STATUS_SUCCESS
+                    << dwFileAttributes
+                    << ftCreationTime
+                    << ftLastAccessTime
+                    << ftLastWriteTime
+                    << size
+                    << dwVolumeSerialNumber
+                    << nNumberOfLinks;
 
 
 }
@@ -1030,32 +1041,40 @@ void NetworkDriveClient::clientFindFiles(QByteArray &reply, const QString &fileN
 
     for(int i = 0;i<infoList.size();++i)
     {
-        WIN32_FIND_DATAW	findData;
+        //WIN32_FIND_DATAW	findData;
 
-        memset(&findData, 0, sizeof(findData));
+        //memset(&findData, 0, sizeof(findData));
 
-        findData.dwFileAttributes = FILE_ATTRIBUTE_NORMAL;
+        quint64 dwFileAttributes = FILE_ATTRIBUTE_NORMAL;
+
+        dwFileAttributes = FILE_ATTRIBUTE_NORMAL;
         if (infoList[i].isDir())
-            findData.dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY;
-        if (infoList[i].isHidden())
         {
-            findData.dwFileAttributes |= FILE_ATTRIBUTE_HIDDEN;
+            dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY;
         }
 
-        findData.ftCreationTime = toWinFileTime(infoList[i].created());
-        findData.ftLastAccessTime = toWinFileTime(infoList[i].lastRead());
-        findData.ftLastWriteTime = toWinFileTime(infoList[i].lastModified());
+        if (infoList[i].isHidden())
+        {
+            dwFileAttributes |= FILE_ATTRIBUTE_HIDDEN;
+        }
+
+        QDateTime ftCreationTime = infoList[i].created();
+        QDateTime ftLastAccessTime = infoList[i].lastRead();
+        QDateTime ftLastWriteTime = infoList[i].lastModified();
 
         quint64 size = infoList[i].size();
 
-        findData.nFileSizeLow = size & 0xffffffff;
-        findData.nFileSizeHigh = size >> 32;
+       // findData.nFileSizeLow = size & 0xffffffff;
+       // findData.nFileSizeHigh = size >> 32;
 
-        std::wstring stdfilename = infoList[i].fileName().toStdWString();
-        std::u16string wfilename(stdfilename.begin(), stdfilename.end());
-        std::copy(wfilename.c_str(), wfilename.c_str() +wfilename.size()+1, findData.cFileName);
 
-        replyDataStream << QByteArray((char*)&findData, sizeof(findData));
+        replyDataStream << dwFileAttributes
+                        << ftCreationTime
+                        << ftLastAccessTime
+                        << ftLastWriteTime
+                        << size
+                        << infoList[i].fileName();
+
 
        // FillFindData(&findData, DokanFileInfo);
     }

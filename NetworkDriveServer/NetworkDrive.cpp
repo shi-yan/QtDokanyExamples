@@ -154,27 +154,38 @@ NTSTATUS NetworkDrive::MirrorGetFileInformation(LPCWSTR FileName, LPBY_HANDLE_FI
 
     resultStream >> result;
 
-    QByteArray fileInfoArray;
+    quint64 dwFileAttributes;
+    QDateTime ftCreationTime;
+    QDateTime ftLastAccessTime;
+    QDateTime ftLastWriteTime;
+    quint64 size;
+    quint64 dwVolumeSerialNumber;
+    quint64 nNumberOfLinks;
 
-    resultStream >> fileInfoArray;
-
+    resultStream    >> dwFileAttributes
+                    >> ftCreationTime
+                    >> ftLastAccessTime
+                    >> ftLastWriteTime
+                    >> size
+                    >> dwVolumeSerialNumber
+                    >> nNumberOfLinks;
 
     BY_HANDLE_FILE_INFORMATION handleFileInformation;
 
-    memcpy(&handleFileInformation, fileInfoArray.data(), sizeof(handleFileInformation));
+    memset(&handleFileInformation, 0, sizeof(handleFileInformation));
 
-    HandleFileInformation->ftCreationTime = handleFileInformation.ftCreationTime;
-    HandleFileInformation->ftLastAccessTime =handleFileInformation.ftLastAccessTime;
-    HandleFileInformation->ftLastWriteTime = handleFileInformation.ftLastWriteTime;
-    HandleFileInformation->dwFileAttributes = handleFileInformation.dwFileAttributes;
-    HandleFileInformation->nFileSizeLow = handleFileInformation.nFileSizeLow;
-    HandleFileInformation->nFileSizeHigh = handleFileInformation.nFileSizeHigh;
-    HandleFileInformation->dwVolumeSerialNumber = handleFileInformation.dwVolumeSerialNumber;
-    HandleFileInformation->nNumberOfLinks = handleFileInformation.nNumberOfLinks;
-    HandleFileInformation->nFileIndexHigh = handleFileInformation.nFileIndexHigh;
-    HandleFileInformation->nFileIndexLow = handleFileInformation.nFileIndexLow;
+    HandleFileInformation->ftCreationTime = toWinFileTime(ftCreationTime);
+    HandleFileInformation->ftLastAccessTime =toWinFileTime(ftLastAccessTime);
+    HandleFileInformation->ftLastWriteTime = toWinFileTime(ftLastWriteTime);
+    HandleFileInformation->dwFileAttributes = dwFileAttributes;
+    HandleFileInformation->nFileSizeLow = size & 0xffffffff;
+    HandleFileInformation->nFileSizeHigh = size >> 32;
+    HandleFileInformation->dwVolumeSerialNumber = dwVolumeSerialNumber;
+    HandleFileInformation->nNumberOfLinks = nNumberOfLinks;
+    HandleFileInformation->nFileIndexHigh = 0;
+    HandleFileInformation->nFileIndexLow = 0;
 
-    qDebug() << HandleFileInformation->nFileSizeLow << HandleFileInformation->nFileSizeHigh;
+    //qDebug() << HandleFileInformation->nFileSizeLow << HandleFileInformation->nFileSizeHigh;
 
     return result;
 }
@@ -202,13 +213,43 @@ NTSTATUS NetworkDrive::MirrorFindFiles(LPCWSTR FileName, PFillFindData FillFindD
 
     for(int i = 0;i<dataCount;++i)
     {
+
+        quint64 dwFileAttributes;
+
+
+        QDateTime ftCreationTime ;
+        QDateTime ftLastAccessTime ;
+        QDateTime ftLastWriteTime ;
+
+        quint64 size ;
+        QString filename;
+
+       // findData.nFileSizeLow = size & 0xffffffff;
+       // findData.nFileSizeHigh = size >> 32;
+
+
+        resultStream >> dwFileAttributes
+                        >> ftCreationTime
+                        >> ftLastAccessTime
+                        >> ftLastWriteTime
+                        >> size
+                        >> filename;
+
+
         WIN32_FIND_DATAW	findData;
 
-        QByteArray findDataArray;
+        memset(&findData, 0, sizeof(findData));
 
-        resultStream >> findDataArray;
+        findData.dwFileAttributes = dwFileAttributes;
+        findData.ftCreationTime = toWinFileTime(ftCreationTime);
+        findData.ftLastAccessTime = toWinFileTime(ftLastAccessTime);
+        findData.ftLastWriteTime = toWinFileTime(ftLastWriteTime);
+        findData.nFileSizeLow = size & 0xffffffff;
+        findData.nFileSizeHigh = size >> 32;
 
-        memcpy(&findData, findDataArray.data(), sizeof(findData));
+        std::wstring stdfilename = filename.toStdWString();
+        std::u16string wfilename(stdfilename.begin(), stdfilename.end());
+        std::copy(wfilename.c_str(), wfilename.c_str() +wfilename.size()+1, findData.cFileName);
 
         FillFindData(&findData, DokanFileInfo);
 
