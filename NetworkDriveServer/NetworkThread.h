@@ -7,11 +7,11 @@
 class NetworkThread : public QThread
 {
     Q_OBJECT
-
+    int m_port;
     NetworkDriveServer *m_server;
 
 public:
-    NetworkThread();
+    NetworkThread(int port = 12345);
 
     void run();
 

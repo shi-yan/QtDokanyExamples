@@ -3,6 +3,7 @@
 
 #include <QTcpSocket>
 #include <QByteArray>
+#include <QHostAddress>
 
 class NetworkDriveClient : public QObject
 {
@@ -18,7 +19,7 @@ public:
     NetworkDriveClient(const QString &directory, const QString &driveLetter);
     ~NetworkDriveClient();
 
-    void connectToServer();
+    void connectToServer(const QHostAddress &address = QHostAddress::LocalHost, int port = 12345);
     void processData();
     void processMessage(QByteArray &message);
 

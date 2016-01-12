@@ -33,12 +33,12 @@ NetworkDriveClient::~NetworkDriveClient()
     m_dataBuffer.clear();
 }
 
-void NetworkDriveClient::connectToServer()
+void NetworkDriveClient::connectToServer(const QHostAddress &address, int port)
 {
     if (!m_socket)
     {
         m_socket = new QTcpSocket(this);
-        m_socket->connectToHost(QHostAddress::LocalHost, 12345);
+        m_socket->connectToHost(address, port);
         connect(m_socket, SIGNAL(connected()), this, SLOT(onSocketConnected()));
         connect(m_socket, SIGNAL(readyRead()), this, SLOT(onSocketReadyRead()));
     }

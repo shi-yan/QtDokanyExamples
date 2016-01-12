@@ -1,6 +1,6 @@
 #include "NetworkThread.h"
 
-NetworkThread::NetworkThread():QThread(),m_server(NULL)
+NetworkThread::NetworkThread(int port):QThread(),m_port(port),m_server(NULL)
 {
 
 }
@@ -8,7 +8,7 @@ NetworkThread::NetworkThread():QThread(),m_server(NULL)
 void NetworkThread::run()
 {
     m_server = new NetworkDriveServer();
-    m_server->listen(QHostAddress::LocalHost, 12345);
+    m_server->listen(QHostAddress::LocalHost, m_port);
     exec();
 }
 

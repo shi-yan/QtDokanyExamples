@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     QCommandLineParser parser;
     parser.setApplicationDescription("This is an example of using Qt to implement a dokany driver. \n\n"
                                      "Example for local test:          NetworkDriveServer.exe -t -d c:\\test -l m \n"
-                                     "Example for running as a server: NetworkDriveServer.exe");
+                                     "Example for running as a server: NetworkDriveServer.exe -p 12345");
     parser.addHelpOption();
     parser.addVersionOption();
 
@@ -34,6 +34,11 @@ int main(int argc, char *argv[])
                                              "The letter of the dokany drive.",
                                              "letter");
     parser.addOption(letterOption);
+
+    QCommandLineOption portOption(QStringList() << "p" << "port",
+                                             "The port the server listens to.",
+                                             "port", "12345");
+    parser.addOption(portOption);
 
     parser.process(app);
 
@@ -77,6 +82,15 @@ int main(int argc, char *argv[])
             }
         }
     }
+    else
+    {
+        int port = parser.value(portOption).toInt();
+        qDebug() << "run the server mode" << port;
+        NetworkThread *netThread = new NetworkThread(port);
+        netThread->start();
+        while(!netThread->getNetworkDriveServer());
+        return app.exec();
+    }
 
-    return app.exec();
+    return -1;
 }
