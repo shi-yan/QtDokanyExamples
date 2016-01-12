@@ -1,19 +1,13 @@
-#ifndef NETWORKDRIVE_H
-#define NETWORKDRIVE_H
+#ifndef MIRRORDRIVE_H
+#define MIRRORDRIVE_H
 
-#include "DokanDriveImplementation.h"
-#include "NetworkDriveClient.h"
-#include "NetworkDriveServer.h"
+#include "../Common/DokanDriveImplementation.h"
 
-class NetworkDrive : public DokanDriveImplementation
+class MirrorDrive : public DokanDriveImplementation
 {
-private:
-    //NetworkDriveClient *m_client;
-    NetworkDriveServer *m_server;
-
 public:
-    NetworkDrive(NetworkDriveServer *server);
-    ~NetworkDrive();
+    MirrorDrive(const QString &directory);
+    ~MirrorDrive();
 
     NTSTATUS MirrorCreateFile(LPCWSTR FileName, PDOKAN_IO_SECURITY_CONTEXT SecurityContext, ACCESS_MASK AccessMode, ULONG FileAttributes, ULONG ShareMode, ULONG CreateDisposition, ULONG CreateOptions, PDOKAN_FILE_INFO DokanFileInfo);
 
@@ -23,7 +17,7 @@ public:
 
     NTSTATUS MirrorReadFile(LPCWSTR FileName, LPVOID Buffer, DWORD BufferLength, LPDWORD ReadLength, LONGLONG Offset, PDOKAN_FILE_INFO DokanFileInfo);
 
-    NTSTATUS MirrorWriteFile(LPCWSTR FileName, LPCVOID Buffer, DWORD	NumberOfBytesToWrite, LPDWORD NumberOfBytesWritten, LONGLONG Offset, PDOKAN_FILE_INFO DokanFileInfo);
+    NTSTATUS MirrorWriteFile(LPCWSTR FileName, LPCVOID Buffer, DWORD NumberOfBytesToWrite, LPDWORD NumberOfBytesWritten, LONGLONG Offset, PDOKAN_FILE_INFO DokanFileInfo);
 
     NTSTATUS MirrorFlushFileBuffers(LPCWSTR	FileName, PDOKAN_FILE_INFO DokanFileInfo);
 
@@ -58,7 +52,6 @@ public:
     NTSTATUS MirrorUnmount(PDOKAN_FILE_INFO	DokanFileInfo);
 
     NTSTATUS MirrorEnumerateNamedStreams(LPCWSTR FileName, PVOID* EnumContext, LPWSTR StreamName, PULONG StreamNameLength, PLONGLONG StreamSize, PDOKAN_FILE_INFO DokanFileInfo);
-
 };
 
-#endif // NETWORKDRIVE_H
+#endif // MIRRORDRIVE_H

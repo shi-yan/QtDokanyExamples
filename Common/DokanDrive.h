@@ -7,7 +7,7 @@
 struct DokanMirrorDriveInterface
 {
     static DokanDriveImplementation *m_implementation;
-    static int mount(DokanDriveImplementation *implementation);
+    static int mount(const QString &letter, DokanDriveImplementation *implementation);
 
     static NTSTATUS DOKAN_CALLBACK
     MirrorCreateFile(

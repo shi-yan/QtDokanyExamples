@@ -5,10 +5,10 @@
 
 class FileSystemThread : public QThread
 {
-    const QString m_directory;
-    const QString m_letter;
 public:
-    FileSystemThread(const QString &directory, const QString &letter);
+    FileSystemThread();
+
+
     void run() override;
 };
 

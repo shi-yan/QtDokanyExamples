@@ -26,6 +26,7 @@ const DWORD DataWriteAccess = FILE_WRITE_DATA | FILE_APPEND_DATA | 65536 | FILE_
 class DokanDriveImplementation
 {
 protected:
+    const QString m_directory;
     // Convert a QDateTime to a FILETIME.
     FILETIME toWinFileTime(const QDateTime &dateTime)
     {
@@ -51,7 +52,7 @@ protected:
     }
 
 public:
-    DokanDriveImplementation();
+    DokanDriveImplementation(const QString &directory);
     virtual ~DokanDriveImplementation() {};
 
     virtual NTSTATUS MirrorCreateFile(LPCWSTR FileName, PDOKAN_IO_SECURITY_CONTEXT SecurityContext, ACCESS_MASK AccessMode, ULONG FileAttributes, ULONG ShareMode, ULONG CreateDisposition, ULONG CreateOptions, PDOKAN_FILE_INFO DokanFileInfo) = 0;

@@ -14,16 +14,23 @@ INCLUDEPATH += C:/code/dokan_tot/dokany/dokan \
 
 SOURCES += \
     main.cpp \
+    NetworkDrive.cpp \
+    NetworkDriveServer.cpp \
+    NetworkDriveClient.cpp \
     FileSystemThread.cpp \
+    NetworkThread.cpp \
     ../Common/DokanDrive.cpp \
-    ../Common/DokanDriveImplementation.cpp \
-    MirrorDrive.cpp
+    ../Common/DokanDriveImplementation.cpp
 
 HEADERS += \
+    NetworkDrive.h \
+    NetworkDriveServer.h \
+    NetworkDriveProtocol.h \
+    NetworkDriveClient.h \
     FileSystemThread.h \
+    NetworkThread.h \
     ../Common/DokanDrive.h \
-    ../Common/DokanDriveImplementation.h \
-    MirrorDrive.h
+    ../Common/DokanDriveImplementation.h
 
 LIBS += -lUser32 \
         -lAdvapi32 \

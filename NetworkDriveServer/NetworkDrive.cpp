@@ -2,7 +2,8 @@
 #include <QDataStream>
 #include <QFileInfo>
 
-NetworkDrive::NetworkDrive(NetworkDriveServer *server)
+NetworkDrive::NetworkDrive(const QString &directory, NetworkDriveServer *server)
+    :DokanDriveImplementation(directory)
 {
     //m_client = new NetworkDriveClient();
     m_server = server;

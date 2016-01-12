@@ -10,7 +10,6 @@
 #include <ntstatus.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "dokan.h"
 #include "fileinfo.h"
 
 const DWORD DataAccess = FILE_READ_DATA | FILE_WRITE_DATA | FILE_APPEND_DATA |
@@ -925,7 +924,7 @@ void NetworkDriveClient::clientWriteFile(QByteArray &reply, const QString &fileN
 
         //qDebug() << "memory mapped read" << filePath;
         QFile file(filePath);
-        file.open(QFile::ReadOnly);
+        file.open(QFile::WriteOnly);
         file.seek(Offset);
         quint64 NumberOfBytesWritten = file.write((char*)buffer, NumberOfBytesToWrite);
         replyDataStream << NumberOfBytesWritten;

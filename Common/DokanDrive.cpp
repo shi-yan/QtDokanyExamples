@@ -3,7 +3,7 @@
 
 DokanDriveImplementation *DokanMirrorDriveInterface::m_implementation = NULL;
 
-int DokanMirrorDriveInterface::mount(DokanDriveImplementation *implementation)
+int DokanMirrorDriveInterface::mount(const QString &letter, DokanDriveImplementation *implementation)
 {
     DokanMirrorDriveInterface::m_implementation = implementation;
     PDOKAN_OPERATIONS dokanOperations = (PDOKAN_OPERATIONS)malloc(sizeof(DOKAN_OPERATIONS));
@@ -24,9 +24,8 @@ int DokanMirrorDriveInterface::mount(DokanDriveImplementation *implementation)
     ZeroMemory(dokanOptions, sizeof(DOKAN_OPTIONS));
     dokanOptions->Version = DOKAN_VERSION;
     dokanOptions->ThreadCount = 1;
-    QString mountPoint = "m";
-    dokanOptions->MountPoint = (const wchar_t*) mountPoint.utf16();
-    //dokanOptions->Options |= DOKAN_OPTION_DEBUG;
+    dokanOptions->MountPoint = (const wchar_t*) letter.utf16();
+    dokanOptions->Options |= DOKAN_OPTION_DEBUG;
     dokanOptions->Options |= DOKAN_OPTION_STDERR;
     dokanOptions->Options |= DOKAN_OPTION_ALT_STREAM;
 

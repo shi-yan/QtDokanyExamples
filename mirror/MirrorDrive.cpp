@@ -1,20 +1,21 @@
-#include "LocalDrive.h"
+#include "MirrorDrive.h"
 
-LocalDrive::LocalDrive()
+MirrorDrive::MirrorDrive(const QString &directory)
+    :DokanDriveImplementation(directory)
 {
 
 }
 
-LocalDrive::~LocalDrive()
+MirrorDrive::~MirrorDrive()
 {
 
 }
 
-NTSTATUS LocalDrive::MirrorCreateFile(LPCWSTR FileName, PDOKAN_IO_SECURITY_CONTEXT SecurityContext, ACCESS_MASK AccessMode, ULONG FileAttributes, ULONG ShareMode, ULONG CreateDisposition, ULONG CreateOptions, PDOKAN_FILE_INFO DokanFileInfo)
+NTSTATUS MirrorDrive::MirrorCreateFile(LPCWSTR FileName, PDOKAN_IO_SECURITY_CONTEXT SecurityContext, ACCESS_MASK AccessMode, ULONG FileAttributes, ULONG ShareMode, ULONG CreateDisposition, ULONG CreateOptions, PDOKAN_FILE_INFO DokanFileInfo)
 {
     QString fileName = getFileName(FileName);
 
-    QDir dir("c:\\test");
+    QDir dir(m_directory);
     QString filePath = dir.absoluteFilePath(fileName);
     qDebug() << "inside create file" << filePath;
 
@@ -149,7 +150,7 @@ NTSTATUS LocalDrive::MirrorCreateFile(LPCWSTR FileName, PDOKAN_IO_SECURITY_CONTE
     return STATUS_SUCCESS;
 }
 
-void LocalDrive::MirrorCloseFile(LPCWSTR FileName, PDOKAN_FILE_INFO DokanFileInfo)
+void MirrorDrive::MirrorCloseFile(LPCWSTR FileName, PDOKAN_FILE_INFO DokanFileInfo)
 {
     if (DokanFileInfo->Context)
     {
@@ -160,7 +161,7 @@ void LocalDrive::MirrorCloseFile(LPCWSTR FileName, PDOKAN_FILE_INFO DokanFileInf
     }
 }
 
-void LocalDrive::MirrorCleanup(LPCWSTR FileName, PDOKAN_FILE_INFO DokanFileInfo)
+void MirrorDrive::MirrorCleanup(LPCWSTR FileName, PDOKAN_FILE_INFO DokanFileInfo)
 {
     if (DokanFileInfo->Context)
     {
@@ -171,7 +172,7 @@ void LocalDrive::MirrorCleanup(LPCWSTR FileName, PDOKAN_FILE_INFO DokanFileInfo)
 
     QString fileName = getFileName(FileName);
 
-    QDir dir("c:\\test");
+    QDir dir(m_directory);
 
     QString filePath = dir.absoluteFilePath(fileName);
 
@@ -185,7 +186,7 @@ void LocalDrive::MirrorCleanup(LPCWSTR FileName, PDOKAN_FILE_INFO DokanFileInfo)
     return ;
 }
 
-NTSTATUS LocalDrive::MirrorReadFile(LPCWSTR FileName, LPVOID Buffer, DWORD BufferLength, LPDWORD ReadLength, LONGLONG Offset, PDOKAN_FILE_INFO DokanFileInfo)
+NTSTATUS MirrorDrive::MirrorReadFile(LPCWSTR FileName, LPVOID Buffer, DWORD BufferLength, LPDWORD ReadLength, LONGLONG Offset, PDOKAN_FILE_INFO DokanFileInfo)
 {
     if (DokanFileInfo->Context)
     {
@@ -198,7 +199,7 @@ NTSTATUS LocalDrive::MirrorReadFile(LPCWSTR FileName, LPVOID Buffer, DWORD Buffe
     {
         QString fileName = getFileName(FileName);
 
-        QDir dir("c:\\test");
+        QDir dir(m_directory);
 
         QString filePath = dir.absoluteFilePath(fileName);
 
@@ -214,7 +215,7 @@ NTSTATUS LocalDrive::MirrorReadFile(LPCWSTR FileName, LPVOID Buffer, DWORD Buffe
     return STATUS_SUCCESS;
 }
 
-NTSTATUS LocalDrive::MirrorWriteFile(LPCWSTR FileName, LPCVOID Buffer, DWORD NumberOfBytesToWrite, LPDWORD NumberOfBytesWritten, LONGLONG Offset, PDOKAN_FILE_INFO DokanFileInfo)
+NTSTATUS MirrorDrive::MirrorWriteFile(LPCWSTR FileName, LPCVOID Buffer, DWORD NumberOfBytesToWrite, LPDWORD NumberOfBytesWritten, LONGLONG Offset, PDOKAN_FILE_INFO DokanFileInfo)
 {
     if (DokanFileInfo->Context)
     {
@@ -227,13 +228,13 @@ NTSTATUS LocalDrive::MirrorWriteFile(LPCWSTR FileName, LPCVOID Buffer, DWORD Num
     {
         QString fileName = getFileName(FileName);
 
-        QDir dir("c:\\test");
+        QDir dir(m_directory);
 
         QString filePath = dir.absoluteFilePath(fileName);
 
         qDebug() << "memory mapped read" << filePath;
         QFile file(filePath);
-        file.open(QFile::ReadOnly);
+        file.open(QFile::WriteOnly);
         file.seek(Offset);
         *NumberOfBytesWritten = file.write((char*)Buffer, NumberOfBytesToWrite);
         file.close();
@@ -242,7 +243,7 @@ NTSTATUS LocalDrive::MirrorWriteFile(LPCWSTR FileName, LPCVOID Buffer, DWORD Num
     return STATUS_SUCCESS;
 }
 
-NTSTATUS LocalDrive::MirrorFlushFileBuffers(LPCWSTR	FileName, PDOKAN_FILE_INFO DokanFileInfo)
+NTSTATUS MirrorDrive::MirrorFlushFileBuffers(LPCWSTR	FileName, PDOKAN_FILE_INFO DokanFileInfo)
 {
     if (DokanFileInfo->Context)
     {
@@ -254,11 +255,11 @@ NTSTATUS LocalDrive::MirrorFlushFileBuffers(LPCWSTR	FileName, PDOKAN_FILE_INFO D
     return STATUS_SUCCESS;
 }
 
-NTSTATUS LocalDrive::MirrorGetFileInformation(LPCWSTR FileName, LPBY_HANDLE_FILE_INFORMATION HandleFileInformation, PDOKAN_FILE_INFO DokanFileInfo)
+NTSTATUS MirrorDrive::MirrorGetFileInformation(LPCWSTR FileName, LPBY_HANDLE_FILE_INFORMATION HandleFileInformation, PDOKAN_FILE_INFO DokanFileInfo)
 {
     QString fileName = getFileName(FileName);
 
-    QDir dir("c:\\test");
+    QDir dir(m_directory);
 
     QString filePath = dir.absoluteFilePath(fileName);
 
@@ -300,12 +301,12 @@ NTSTATUS LocalDrive::MirrorGetFileInformation(LPCWSTR FileName, LPBY_HANDLE_FILE
     return STATUS_SUCCESS;
 }
 
-NTSTATUS LocalDrive::MirrorFindFiles(LPCWSTR FileName, PFillFindData FillFindData, PDOKAN_FILE_INFO	DokanFileInfo)
+NTSTATUS MirrorDrive::MirrorFindFiles(LPCWSTR FileName, PFillFindData FillFindData, PDOKAN_FILE_INFO	DokanFileInfo)
 {
     QString fileName = QString::fromStdWString(FileName);
     fileName = fileName.right(fileName.size() - 1);
 
-    QDir dir("c:\\test");
+    QDir dir(m_directory);
 
     QString filePath = dir.absoluteFilePath(fileName);
 
@@ -349,19 +350,19 @@ NTSTATUS LocalDrive::MirrorFindFiles(LPCWSTR FileName, PFillFindData FillFindDat
     return STATUS_SUCCESS;
 }
 
-NTSTATUS LocalDrive::MirrorDeleteFile(LPCWSTR FileName, PDOKAN_FILE_INFO DokanFileInfo)
+NTSTATUS MirrorDrive::MirrorDeleteFile(LPCWSTR FileName, PDOKAN_FILE_INFO DokanFileInfo)
 {
     UNREFERENCED_PARAMETER(DokanFileInfo);
     return STATUS_SUCCESS;
 }
 
-NTSTATUS LocalDrive::MirrorDeleteDirectory(LPCWSTR FileName, PDOKAN_FILE_INFO DokanFileInfo)
+NTSTATUS MirrorDrive::MirrorDeleteDirectory(LPCWSTR FileName, PDOKAN_FILE_INFO DokanFileInfo)
 {
     UNREFERENCED_PARAMETER(DokanFileInfo);
 
     QString fileName = getFileName(FileName);
 
-    QDir dir("c:\\test");
+    QDir dir(m_directory);
 
     QString filePath = dir.absoluteFilePath(fileName);
 
@@ -375,12 +376,12 @@ NTSTATUS LocalDrive::MirrorDeleteDirectory(LPCWSTR FileName, PDOKAN_FILE_INFO Do
         return ERROR_DIR_NOT_EMPTY;
 }
 
-NTSTATUS LocalDrive::MirrorMoveFile(LPCWSTR	FileName, LPCWSTR NewFileName, BOOL ReplaceIfExisting, PDOKAN_FILE_INFO DokanFileInfo)
+NTSTATUS MirrorDrive::MirrorMoveFile(LPCWSTR	FileName, LPCWSTR NewFileName, BOOL ReplaceIfExisting, PDOKAN_FILE_INFO DokanFileInfo)
 {
     QString oldFileName = QString::fromStdWString(FileName);
     oldFileName = oldFileName.right(oldFileName.size() - 1);
 
-    QDir olddir("c:\\test");
+    QDir olddir(m_directory);
 
     QString oldFilePath = olddir.absoluteFilePath(oldFileName);
 
@@ -390,7 +391,7 @@ NTSTATUS LocalDrive::MirrorMoveFile(LPCWSTR	FileName, LPCWSTR NewFileName, BOOL 
     QString newFileName = QString::fromStdWString(NewFileName);
     newFileName = newFileName.right(newFileName.size() - 1);
 
-    QDir newdir("c:\\test");
+    QDir newdir(m_directory);
 
     QString newFilePath = newdir.absoluteFilePath(newFileName);
 
@@ -417,7 +418,7 @@ NTSTATUS LocalDrive::MirrorMoveFile(LPCWSTR	FileName, LPCWSTR NewFileName, BOOL 
     return ERROR_FILE_EXISTS;
 }
 
-NTSTATUS LocalDrive::MirrorLockFile(LPCWSTR	FileName, LONGLONG ByteOffset, LONGLONG Length, PDOKAN_FILE_INFO DokanFileInfo)
+NTSTATUS MirrorDrive::MirrorLockFile(LPCWSTR	FileName, LONGLONG ByteOffset, LONGLONG Length, PDOKAN_FILE_INFO DokanFileInfo)
 {
     if (DokanFileInfo->Context)
     {
@@ -430,17 +431,17 @@ NTSTATUS LocalDrive::MirrorLockFile(LPCWSTR	FileName, LONGLONG ByteOffset, LONGL
     return STATUS_SUCCESS;
 }
 
-NTSTATUS LocalDrive::MirrorSetEndOfFile(LPCWSTR	FileName, LONGLONG ByteOffset, PDOKAN_FILE_INFO DokanFileInfo)
+NTSTATUS MirrorDrive::MirrorSetEndOfFile(LPCWSTR	FileName, LONGLONG ByteOffset, PDOKAN_FILE_INFO DokanFileInfo)
 {
     return STATUS_SUCCESS;
 }
 
-NTSTATUS LocalDrive::MirrorSetAllocationSize(LPCWSTR FileName, LONGLONG	AllocSize, PDOKAN_FILE_INFO DokanFileInfo)
+NTSTATUS MirrorDrive::MirrorSetAllocationSize(LPCWSTR FileName, LONGLONG	AllocSize, PDOKAN_FILE_INFO DokanFileInfo)
 {
     return STATUS_SUCCESS;
 }
 
-NTSTATUS LocalDrive::MirrorSetFileAttributes(LPCWSTR FileName, DWORD FileAttributes, PDOKAN_FILE_INFO DokanFileInfo)
+NTSTATUS MirrorDrive::MirrorSetFileAttributes(LPCWSTR FileName, DWORD FileAttributes, PDOKAN_FILE_INFO DokanFileInfo)
 {
     UNREFERENCED_PARAMETER(DokanFileInfo);
 
@@ -454,7 +455,7 @@ NTSTATUS LocalDrive::MirrorSetFileAttributes(LPCWSTR FileName, DWORD FileAttribu
     return STATUS_SUCCESS;
 }
 
-NTSTATUS LocalDrive::MirrorSetFileTime(LPCWSTR FileName, CONST FILETIME* CreationTime, CONST FILETIME* LastAccessTime, CONST FILETIME* LastWriteTime, PDOKAN_FILE_INFO DokanFileInfo)
+NTSTATUS MirrorDrive::MirrorSetFileTime(LPCWSTR FileName, CONST FILETIME* CreationTime, CONST FILETIME* LastAccessTime, CONST FILETIME* LastWriteTime, PDOKAN_FILE_INFO DokanFileInfo)
 {
     if (DokanFileInfo->Context)
     {
@@ -467,26 +468,26 @@ NTSTATUS LocalDrive::MirrorSetFileTime(LPCWSTR FileName, CONST FILETIME* Creatio
     return STATUS_SUCCESS;
 }
 
-NTSTATUS LocalDrive::MirrorUnlockFile(LPCWSTR FileName, LONGLONG ByteOffset, LONGLONG	Length, PDOKAN_FILE_INFO	DokanFileInfo)
+NTSTATUS MirrorDrive::MirrorUnlockFile(LPCWSTR FileName, LONGLONG ByteOffset, LONGLONG	Length, PDOKAN_FILE_INFO	DokanFileInfo)
 {
 
     return STATUS_SUCCESS;
 }
 
-NTSTATUS LocalDrive::MirrorGetFileSecurity(LPCWSTR FileName, PSECURITY_INFORMATION SecurityInformation, PSECURITY_DESCRIPTOR SecurityDescriptor, ULONG BufferLength, PULONG	LengthNeeded, PDOKAN_FILE_INFO DokanFileInfo)
+NTSTATUS MirrorDrive::MirrorGetFileSecurity(LPCWSTR FileName, PSECURITY_INFORMATION SecurityInformation, PSECURITY_DESCRIPTOR SecurityDescriptor, ULONG BufferLength, PULONG	LengthNeeded, PDOKAN_FILE_INFO DokanFileInfo)
 {
     UNREFERENCED_PARAMETER(DokanFileInfo);
 
     return STATUS_SUCCESS;
 }
 
-NTSTATUS LocalDrive::MirrorSetFileSecurity(LPCWSTR FileName, PSECURITY_INFORMATION SecurityInformation, PSECURITY_DESCRIPTOR SecurityDescriptor, ULONG SecurityDescriptorLength, PDOKAN_FILE_INFO DokanFileInfo)
+NTSTATUS MirrorDrive::MirrorSetFileSecurity(LPCWSTR FileName, PSECURITY_INFORMATION SecurityInformation, PSECURITY_DESCRIPTOR SecurityDescriptor, ULONG SecurityDescriptorLength, PDOKAN_FILE_INFO DokanFileInfo)
 {
     return STATUS_SUCCESS;
 
 }
 
-NTSTATUS LocalDrive::MirrorGetVolumeInformation(LPWSTR VolumeNameBuffer, DWORD VolumeNameSize, LPDWORD VolumeSerialNumber, LPDWORD	MaximumComponentLength, LPDWORD	FileSystemFlags, LPWSTR	FileSystemNameBuffer, DWORD	FileSystemNameSize, PDOKAN_FILE_INFO DokanFileInfo)
+NTSTATUS MirrorDrive::MirrorGetVolumeInformation(LPWSTR VolumeNameBuffer, DWORD VolumeNameSize, LPDWORD VolumeSerialNumber, LPDWORD	MaximumComponentLength, LPDWORD	FileSystemFlags, LPWSTR	FileSystemNameBuffer, DWORD	FileSystemNameSize, PDOKAN_FILE_INFO DokanFileInfo)
 {
     UNREFERENCED_PARAMETER(DokanFileInfo);
 
@@ -504,7 +505,7 @@ NTSTATUS LocalDrive::MirrorGetVolumeInformation(LPWSTR VolumeNameBuffer, DWORD V
     return STATUS_SUCCESS;
 }
 
-NTSTATUS LocalDrive::MirrorUnmount(PDOKAN_FILE_INFO	DokanFileInfo)
+NTSTATUS MirrorDrive::MirrorUnmount(PDOKAN_FILE_INFO	DokanFileInfo)
 {
     UNREFERENCED_PARAMETER(DokanFileInfo);
 
@@ -512,7 +513,7 @@ NTSTATUS LocalDrive::MirrorUnmount(PDOKAN_FILE_INFO	DokanFileInfo)
     return STATUS_SUCCESS;
 }
 
-NTSTATUS LocalDrive::MirrorEnumerateNamedStreams(LPCWSTR FileName, PVOID* EnumContext, LPWSTR StreamName, PULONG StreamNameLength, PLONGLONG StreamSize, PDOKAN_FILE_INFO DokanFileInfo)
+NTSTATUS MirrorDrive::MirrorEnumerateNamedStreams(LPCWSTR FileName, PVOID* EnumContext, LPWSTR StreamName, PULONG StreamNameLength, PLONGLONG StreamSize, PDOKAN_FILE_INFO DokanFileInfo)
 {
     return STATUS_SUCCESS;
 

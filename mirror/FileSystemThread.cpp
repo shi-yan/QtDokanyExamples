@@ -1,29 +1,17 @@
 #include "FileSystemThread.h"
-#include "LocalDrive.h"
-#include "DokanDrive.h"
-#include "NetworkDrive.h"
-#include "NetworkDriveClient.h"
-#include "NetworkThread.h"
+#include "MirrorDrive.h"
+#include "../Common/DokanDrive.h"
 
-FileSystemThread::FileSystemThread()
+FileSystemThread::FileSystemThread(const QString &directory, const QString &letter)
+    :m_directory(directory),
+      m_letter(letter)
 {
 
 }
 
 void FileSystemThread::run()
 {
-
-    NetworkThread *netThread = new NetworkThread();
-    netThread->start();
-
-    while(!netThread->getNetworkDriveServer());
-
-    NetworkDrive *networkDrive = new NetworkDrive(netThread->getNetworkDriveServer());
-    DokanMirrorDriveInterface::mount(networkDrive);
-/*
-    LocalDrive *localDrive = new LocalDrive();
-    DokanMirrorDriveInterface::mount(localDrive);*/
-   // exec();
-
+    MirrorDrive *mirrorDrive = new MirrorDrive(m_directory);
+    DokanMirrorDriveInterface::mount(m_letter, mirrorDrive);
 }
 
