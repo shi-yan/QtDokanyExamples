@@ -4,13 +4,40 @@
 #include <QDataStream>
 #include <QDateTime>
 #include <QDir>
-#include <windows.h>
+//#include <windows.h>
 #undef WIN32_NO_STATUS
-#include <winbase.h>
-#include <ntstatus.h>
+
+#ifdef __APPLE__
+#define ULONG unsigned long
+#define BOOLEAN bool
+#define WCHAR short
+#define LONG long
+#define DWORD unsigned long int
+#define LONGLONG long long
+
+typedef union _LARGE_INTEGER {
+  struct {
+    DWORD LowPart;
+    LONG  HighPart;
+  };
+  struct {
+    DWORD LowPart;
+    LONG  HighPart;
+  } u;
+  LONGLONG QuadPart;
+} LARGE_INTEGER, *PLARGE_INTEGER;
+
+#define CCHAR char
+#define USHORT unsigned short
+#define UCHAR unsigned char
+
+#endif
+
+//#include <winbase.h>
+//#include <ntstatus.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "fileinfo.h"
+//#include "fileinfo.h"
 
 const DWORD DataAccess = FILE_READ_DATA | FILE_WRITE_DATA | FILE_APPEND_DATA |
         FILE_EXECUTE | FILE_GENERIC_EXECUTE | FILE_GENERIC_WRITE | FILE_GENERIC_READ;
