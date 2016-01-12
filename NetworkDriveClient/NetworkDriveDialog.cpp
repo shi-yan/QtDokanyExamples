@@ -23,5 +23,5 @@ void Dialog::onConnect()
 
 
     m_networkClient = new NetworkDriveClient(directory, letter);
-    m_networkClient->connectToServer(QHostAddress::LocalHost, 12345);
+    m_networkClient->connectToServer(QHostAddress(address), 12345);
 }

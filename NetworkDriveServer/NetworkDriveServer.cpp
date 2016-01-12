@@ -55,7 +55,7 @@ void NetworkDriveServer::incomingConnection(qintptr handle)
 
 void NetworkDriveServer::onSocketReadyRead()
 {
-    qDebug() << "server received something";
+    //qDebug() << "server received something";
     m_dataBuffer.append(m_socket->readAll());
     processData();
 }
